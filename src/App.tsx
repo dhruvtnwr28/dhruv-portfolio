@@ -4,15 +4,12 @@ import { Navbar } from './components/ui/Navbar';
 import { CustomCursor } from './components/ui/CustomCursor';
 import { HeroSection } from './components/sections/HeroSection';
 import { AboutBento } from './components/sections/AboutBento';
-import { ProjectsSection } from './components/sections/ProjectsSection';
 import { SkillsMatrix } from './components/sections/SkillsMatrix';
 import { ContactSection } from './components/sections/ContactSection';
 import { Footer } from './components/ui/Footer';
-import { InteractiveTerminal } from './components/sections/InteractiveTerminal';
 import { sound } from './utils/audio';
 
 export const App: React.FC = () => {
-  const [terminalOpen, setTerminalOpen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   // Initialize Lenis Smooth Inertia Scroll
@@ -31,19 +28,9 @@ export const App: React.FC = () => {
 
     const rafId = requestAnimationFrame(raf);
 
-    // Global keyboard shortcut: Backtick/Tilde opens terminal
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '`' || e.key === '~') {
-        e.preventDefault();
-        setTerminalOpen((prev) => !prev);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
-      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -54,34 +41,26 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#04060d] text-slate-100 overflow-x-hidden selection:bg-cyan-500 selection:text-black">
+    <div className="relative min-h-screen bg-[#09080d] text-[#f7f5f2] overflow-x-hidden selection:bg-[#f3d2a2] selection:text-black">
       {/* Precision Trailing Custom Cursor */}
       <CustomCursor />
 
-      {/* Floating HUD Navbar */}
+      {/* Aesthetic Floating Navbar */}
       <Navbar
-        onOpenTerminal={() => setTerminalOpen(true)}
         soundEnabled={soundEnabled}
         onToggleSound={handleToggleSound}
       />
 
       {/* Main Experience Flow */}
       <main>
-        <HeroSection onOpenTerminal={() => setTerminalOpen(true)} />
+        <HeroSection />
         <AboutBento />
-        <ProjectsSection />
         <SkillsMatrix />
         <ContactSection />
       </main>
 
-      {/* Futuristic Telemetry Footer */}
+      {/* Minimal Aesthetic Footer */}
       <Footer />
-
-      {/* Interactive Cyber Hacker Terminal (Triggered by button or `~` key) */}
-      <InteractiveTerminal
-        isOpen={terminalOpen}
-        onClose={() => setTerminalOpen(false)}
-      />
     </div>
   );
 };

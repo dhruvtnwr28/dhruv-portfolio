@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Copy, Check, Send, Sparkles, Github, Radio, MessageSquare, ArrowUpRight } from 'lucide-react';
+import { Mail, Copy, Check, Send, Sparkles, Github, ArrowUpRight, MessageSquareHeart } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../../utils/audio';
 
@@ -21,41 +21,38 @@ export const ContactSection: React.FC = () => {
     e.preventDefault();
     sound.playSuccess();
 
-    // Trigger high-impact cyberpunk confetti burst
     confetti({
-      particleCount: 80,
+      particleCount: 70,
       spread: 70,
       origin: { y: 0.7 },
-      colors: ['#00f0ff', '#a855f7', '#38bdf8', '#ffffff'],
+      colors: ['#f3d2a2', '#d8a7ff', '#f2b8c6', '#ffffff'],
     });
 
     setFormSent(true);
   };
 
   return (
-    <section id="contact" className="relative w-full py-24 px-4 sm:px-8 max-w-6xl mx-auto">
+    <section id="contact" className="relative w-full py-24 px-4 sm:px-8 max-w-5xl mx-auto">
       {/* Section Header */}
       <div className="mb-14">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/40 border border-cyan-500/20 text-cyan-400 text-xs font-mono mb-3">
-          <Radio className="w-3.5 h-3.5 animate-pulse" />
-          <span>MODULE // 04: DIRECT TRANSMISSION</span>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-[#f3d2a2]/20 text-[#f3d2a2] text-xs font-mono mb-4">
+          <MessageSquareHeart className="w-3.5 h-3.5" />
+          <span>START A CONVERSATION</span>
         </div>
-        <h2 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-white uppercase">
-          INITIATE <span className="text-gradient-cyan">CONTACT</span>
+        <h2 className="text-3xl sm:text-6xl font-megante tracking-normal text-white uppercase leading-tight">
+          LET’S BUILD SOMETHING <span className="text-gradient-aurora italic">EXCEPTIONAL</span>
         </h2>
-        <p className="text-slate-400 max-w-2xl text-sm sm:text-base mt-2">
-          Ready to build groundbreaking software systems or scale next-gen interactive products? Send an encrypted transmission or copy my direct frequency.
+        <p className="text-[#a39ea8] max-w-2xl text-sm sm:text-base mt-3 leading-relaxed">
+          Whether you have a product in mind, need a full-stack developer on your team, or just want to chat about WebGL and code — my inbox is always open.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        {/* Left Column: Direct Frequency Pill & Socials (2 cols) */}
+        {/* Left Column: Direct Email & Socials */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Quick Copy Email Card */}
-          <div className="p-6 rounded-2xl bg-[#090e1a]/80 backdrop-blur-xl border border-cyan-500/20 hover:border-cyan-500/40 transition-colors shadow-lg">
-            <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 mb-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>PRIMARY FREQUENCY // DIRECT</span>
+          <div className="p-6 rounded-2xl bg-[#121019]/80 backdrop-blur-xl border border-[#f3d2a2]/20 hover:border-[#f3d2a2]/40 transition-colors shadow-lg">
+            <div className="text-xs font-mono text-[#a39ea8] uppercase tracking-wider mb-2">
+              DIRECT INBOX
             </div>
             <div className="text-lg font-mono font-bold text-white mb-4 break-all">
               {email}
@@ -64,26 +61,25 @@ export const ContactSection: React.FC = () => {
             <button
               onClick={copyEmail}
               onMouseEnter={() => sound.playHover()}
-              className="w-full py-3 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(0,240,255,0.3)] transition-all"
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#f3d2a2] to-[#d8a7ff] text-black font-sans font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(243,210,162,0.25)] hover:shadow-[0_0_35px_rgba(243,210,162,0.5)] transition-all"
             >
               {copied ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-950" />
-                  <span>FREQUENCY COPIED TO CLIPBOARD!</span>
+                  <Check className="w-4 h-4 text-black" />
+                  <span>COPIED TO CLIPBOARD!</span>
                 </>
               ) : (
                 <>
                   <Copy className="w-4 h-4" />
-                  <span>COPY EMAIL FREQUENCY</span>
+                  <span>COPY EMAIL ADDRESS</span>
                 </>
               )}
             </button>
           </div>
 
-          {/* Social Links & Telemetry */}
-          <div className="p-6 rounded-2xl bg-[#090e1a]/80 backdrop-blur-xl border border-white/10 space-y-4">
-            <div className="text-xs font-mono text-slate-400 font-semibold uppercase">
-              NETWORK CHANNELS
+          <div className="p-6 rounded-2xl bg-[#121019]/80 backdrop-blur-xl border border-white/10 space-y-3">
+            <div className="text-xs font-mono text-[#a39ea8] uppercase tracking-wider">
+              ONLINE PRESENCE
             </div>
 
             <a
@@ -92,53 +88,53 @@ export const ContactSection: React.FC = () => {
               rel="noreferrer"
               onClick={() => sound.playClick()}
               onMouseEnter={() => sound.playHover()}
-              className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 hover:border-cyan-500/30 transition-all group"
+              className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-[#f3d2a2]/30 transition-all group"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-black/40 text-cyan-400 group-hover:scale-110 transition-transform">
+                <div className="p-2 rounded-lg bg-black/40 text-[#f3d2a2] group-hover:scale-110 transition-transform">
                   <Github className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="font-display font-bold text-white text-sm">GitHub Repository</div>
-                  <div className="font-mono text-xs text-slate-400">@dhruvtnwr28</div>
+                  <div className="font-megante text-base text-white">GitHub</div>
+                  <div className="font-mono text-xs text-[#a39ea8]">@dhruvtnwr28</div>
                 </div>
               </div>
-              <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+              <ArrowUpRight className="w-4 h-4 text-[#a39ea8] group-hover:text-[#f3d2a2] transition-colors" />
             </a>
 
             <a
               href="mailto:dhruvtnwr28@gmail.com"
               onClick={() => sound.playClick()}
               onMouseEnter={() => sound.playHover()}
-              className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 hover:border-cyan-500/30 transition-all group"
+              className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-[#f3d2a2]/30 transition-all group"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-black/40 text-purple-400 group-hover:scale-110 transition-transform">
+                <div className="p-2 rounded-lg bg-black/40 text-[#d8a7ff] group-hover:scale-110 transition-transform">
                   <Mail className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="font-display font-bold text-white text-sm">Electronic Mail</div>
-                  <div className="font-mono text-xs text-slate-400">dhruvtnwr28@gmail.com</div>
+                  <div className="font-megante text-base text-white">Direct Email</div>
+                  <div className="font-mono text-xs text-[#a39ea8]">dhruvtnwr28@gmail.com</div>
                 </div>
               </div>
-              <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+              <ArrowUpRight className="w-4 h-4 text-[#a39ea8] group-hover:text-[#d8a7ff] transition-colors" />
             </a>
           </div>
         </div>
 
-        {/* Right Column: High-Tech Transmitter Form (3 cols) */}
+        {/* Right Column: Clean Form */}
         <div className="lg:col-span-3">
-          <div className="p-6 sm:p-8 rounded-2xl bg-[#090e1a]/90 backdrop-blur-xl border border-white/10 relative overflow-hidden shadow-2xl">
+          <div className="p-6 sm:p-8 rounded-2xl bg-[#121019]/90 backdrop-blur-xl border border-white/10 shadow-2xl">
             {formSent ? (
-              <div className="py-12 flex flex-col items-center justify-center text-center font-mono">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(16,185,129,0.4)]">
-                  <Sparkles className="w-8 h-8 text-emerald-400 animate-spin" />
+              <div className="py-12 flex flex-col items-center justify-center text-center font-sans">
+                <div className="w-16 h-16 rounded-full bg-[#f3d2a2]/20 border border-[#f3d2a2]/40 flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(243,210,162,0.3)]">
+                  <Sparkles className="w-8 h-8 text-[#f3d2a2] animate-spin" />
                 </div>
-                <h3 className="font-display font-bold text-2xl text-white mb-2">
-                  TRANSMISSION ACKNOWLEDGED
+                <h3 className="font-megante text-3xl text-white mb-2">
+                  MESSAGE RECEIVED!
                 </h3>
-                <p className="text-slate-300 text-sm max-w-md mb-6 font-sans">
-                  Your message has entered the high-priority queue. Expect a swift response directly to your inbox.
+                <p className="text-[#a39ea8] text-sm max-w-md mb-6 leading-relaxed">
+                  Thanks for reaching out! I'll read this and get back to your email as soon as my code compiles.
                 </p>
                 <button
                   onClick={() => {
@@ -146,72 +142,64 @@ export const ContactSection: React.FC = () => {
                     setFormSent(false);
                     setFormData({ name: '', email: '', message: '' });
                   }}
-                  className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-cyan-300 text-xs font-mono font-semibold transition-colors"
+                  className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-[#f3d2a2] text-xs font-mono transition-colors"
                 >
-                  TRANSMIT ANOTHER MESSAGE
+                  SEND ANOTHER MESSAGE
                 </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="flex items-center justify-between pb-3 border-b border-white/5 font-mono text-xs">
-                  <span className="text-cyan-400 font-bold flex items-center gap-1.5">
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    SECURE TRANSMITTER DECK
-                  </span>
-                  <span className="text-slate-500">ENCRYPTION: ACTIVE</span>
-                </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-mono text-slate-300 mb-1.5">
-                      IDENTIFIER // YOUR NAME
+                    <label className="block text-xs font-mono text-[#a39ea8] mb-1.5 uppercase">
+                      YOUR NAME
                     </label>
                     <input
                       type="text"
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Alex Mercer"
-                      className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 font-mono text-sm transition-all"
+                      placeholder="Jane Doe"
+                      className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-slate-600 focus:outline-none focus:border-[#f3d2a2] font-sans text-sm transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-mono text-slate-300 mb-1.5">
-                      RETURN FREQUENCY // EMAIL
+                    <label className="block text-xs font-mono text-[#a39ea8] mb-1.5 uppercase">
+                      YOUR EMAIL
                     </label>
                     <input
                       type="email"
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="alex@domain.com"
-                      className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 font-mono text-sm transition-all"
+                      placeholder="jane@domain.com"
+                      className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-slate-600 focus:outline-none focus:border-[#f3d2a2] font-sans text-sm transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono text-slate-300 mb-1.5">
-                    PAYLOAD // TRANSMISSION DETAILS
+                  <label className="block text-xs font-mono text-[#a39ea8] mb-1.5 uppercase">
+                    MESSAGE / PROJECT DETAILS
                   </label>
                   <textarea
                     required
                     rows={4}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    placeholder="Describe your initiative, engineering requirements, or timeline..."
-                    className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-slate-600 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 font-mono text-sm transition-all resize-none"
+                    placeholder="Tell me what you're working on, questions, or just send a hello..."
+                    className="w-full px-4 py-3 rounded-xl bg-black/40 border border-white/10 text-white placeholder-slate-600 focus:outline-none focus:border-[#f3d2a2] font-sans text-sm transition-all resize-none"
                   />
                 </div>
 
                 <button
                   type="submit"
                   onMouseEnter={() => sound.playHover()}
-                  className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 font-mono font-bold text-xs uppercase tracking-wider text-black flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(0,240,255,0.4)] hover:shadow-[0_0_40px_rgba(0,240,255,0.7)] hover:scale-[1.01] transition-all duration-300"
+                  className="w-full py-4 rounded-xl bg-gradient-to-r from-[#f3d2a2] via-[#f2b8c6] to-[#d8a7ff] font-sans font-bold text-xs uppercase tracking-wider text-black flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(243,210,162,0.3)] hover:shadow-[0_0_40px_rgba(243,210,162,0.5)] hover:scale-[1.01] transition-all duration-300"
                 >
-                  <Send className="w-4 h-4" />
-                  <span>DISPATCH TRANSMISSION</span>
+                  <Send className="w-4 h-4 text-black" />
+                  <span>DISPATCH MESSAGE</span>
                 </button>
               </form>
             )}

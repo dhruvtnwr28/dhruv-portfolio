@@ -1,103 +1,162 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HeroCanvas3D } from '../canvas/HeroCanvas3D';
-import { ArrowDownRight, Terminal as TerminalIcon, Sparkles, Code2, Cpu } from 'lucide-react';
+import { Sparkles, Bug, Coffee, ArrowDown, Laugh, Heart, Github, Mail } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { sound } from '../../utils/audio';
 
-interface HeroSectionProps {
-  onOpenTerminal: () => void;
-}
+export const HeroSection: React.FC = () => {
+  const [bugClicks, setBugClicks] = useState(0);
+  const [buttonMessage, setButtonMessage] = useState('Click to "Fix" 1 Bug');
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenTerminal }) => {
-  const scrollToProjects = () => {
+  const funnyMessages = [
+    'Bug squashed! (+2 unexpected features created)',
+    'Error 418: I am a teapot 🫖',
+    'Now 99 bugs in the code, take one down, 127 bugs in the code...',
+    'Deleting node_modules... just kidding 💀',
+    'git push --force origin main (don’t tell anyone)',
+    'It compiled without errors. Something is terribly wrong.',
+    'Works on my machine! You just need my exact laptop.',
+  ];
+
+  const handleFixBug = () => {
     sound.playClick();
-    const target = document.querySelector('#projects');
+    const nextCount = bugClicks + 1;
+    setBugClicks(nextCount);
+
+    const randomMsg = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+    setButtonMessage(randomMsg);
+
+    if (nextCount % 3 === 0) {
+      sound.playSuccess();
+      confetti({
+        particleCount: 50,
+        spread: 60,
+        origin: { y: 0.6 },
+        colors: ['#f3d2a2', '#d8a7ff', '#f2b8c6'],
+      });
+    }
+  };
+
+  const scrollToContact = () => {
+    sound.playClick();
+    const target = document.querySelector('#contact');
     if (target) {
       target.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   return (
-    <section className="relative w-full min-h-screen flex flex-col justify-between pt-28 pb-10 px-4 sm:px-8 overflow-hidden select-none">
-      {/* 3D WebGL Canvas Layer */}
+    <section className="relative w-full min-h-screen flex flex-col justify-between pt-32 pb-14 px-4 sm:px-8 overflow-hidden select-none">
+      {/* Aesthetic 3D Liquid Pearl Canvas */}
       <HeroCanvas3D />
 
-      {/* Cyber Grid & Vignette Overlays */}
-      <div className="absolute inset-0 cyber-grid-bg opacity-30 pointer-events-none" />
-      <div className="absolute inset-0 radial-vignette pointer-events-none" />
+      {/* Warm Ambient Glows */}
+      <div className="absolute inset-0 aurora-bg opacity-70 pointer-events-none" />
 
       {/* Hero Content Container */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto flex-1 flex flex-col justify-center items-start pointer-events-none">
-        {/* System Protocol Pill */}
-        <div className="pointer-events-auto inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 text-xs font-mono tracking-wider mb-6 shadow-[0_0_20px_rgba(0,240,255,0.15)] backdrop-blur-md">
+      <div className="relative z-10 w-full max-w-5xl mx-auto flex-1 flex flex-col justify-center items-start pointer-events-none">
+        
+        {/* Playful Status Pill */}
+        <div className="pointer-events-auto inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#13111b]/80 border border-[#f3d2a2]/30 text-[#f3d2a2] text-xs font-mono tracking-wider mb-6 shadow-[0_0_25px_rgba(243,210,162,0.15)] backdrop-blur-md">
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#f3d2a2] opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#f3d2a2]" />
           </span>
-          <span>DHRUV TANWAR // QUANTUM PROTOCOL ACTIVE</span>
+          <span>DHRUV TANWAR ✦ HARD WORK IN PROGRESS</span>
         </div>
 
-        {/* Main Kinetic Headline */}
-        <div className="space-y-1 mb-6">
-          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black font-display tracking-tight text-white uppercase leading-[0.95]">
-            <span className="block text-gradient-cyan drop-shadow-[0_5px_25px_rgba(0,240,255,0.25)]">
-              ARCHITECTING
+        {/* Big Bold Headline with MEGANTE Font */}
+        <div className="space-y-2 mb-6">
+          <h1 className="text-4xl sm:text-7xl md:text-8xl font-megante tracking-normal text-[#fdfbf7] uppercase leading-[0.95] drop-shadow-[0_10px_35px_rgba(0,0,0,0.8)]">
+            <span className="block text-gradient-champagne">
+              SITE IS UNDER
             </span>
-            <span className="block text-white/95 drop-shadow-[0_5px_30px_rgba(255,255,255,0.1)]">
-              THE NEXT WEB.
+            <span className="block text-gradient-aurora italic">
+              DEVELOPMENT
+            </span>
+            <span className="block text-white/95">
+              FOR NOW.
             </span>
           </h1>
         </div>
 
-        {/* Technical Subtitle */}
-        <p className="max-w-xl text-slate-300 text-sm sm:text-base md:text-lg font-light leading-relaxed mb-8 backdrop-blur-sm bg-black/20 p-2 rounded-lg border border-white/5 pointer-events-auto">
-          Full-Stack MERN Developer & Creative Technologist bridging the chasm between bulletproof scalable backend architecture and mind-bending 3D interactive experiences.
-        </p>
+        {/* Humorous Human Subtitle */}
+        <div className="pointer-events-auto max-w-2xl bg-[#13111b]/80 border border-[#f3d2a2]/20 rounded-2xl p-5 sm:p-6 backdrop-blur-xl mb-8 shadow-xl">
+          <p className="text-[#eae6df] text-sm sm:text-base leading-relaxed font-sans mb-3">
+            <span className="font-bold text-[#f3d2a2]">"Works on my machine™"</span> — but I'm currently convincing production to agree.
+          </p>
+          <p className="text-[#a39ea8] text-xs sm:text-sm leading-relaxed">
+            Instead of giving you another cookie-cutter AI template with fake cyber matrix text, I'm handcrafting something genuinely special. In the meantime, feel free to play with the 3D liquid sculpture behind this text or click around before I accidentally break localhost again.
+          </p>
+        </div>
 
-        {/* Interactive Action Hub */}
-        <div className="pointer-events-auto flex flex-wrap items-center gap-4">
+        {/* Interactive Humorous Bug Fixer Deck */}
+        <div className="pointer-events-auto flex flex-wrap items-center gap-3 mb-8">
           <button
-            onClick={scrollToProjects}
+            onClick={handleFixBug}
             onMouseEnter={() => sound.playHover()}
-            className="group relative px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-mono font-bold text-xs sm:text-sm text-black tracking-wider uppercase overflow-hidden shadow-[0_0_30px_rgba(0,240,255,0.4)] hover:shadow-[0_0_45px_rgba(0,240,255,0.8)] transition-all duration-300 flex items-center gap-2"
+            className="group relative px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#f3d2a2] to-[#d8a7ff] font-sans font-bold text-xs sm:text-sm text-black tracking-wide uppercase overflow-hidden shadow-[0_0_30px_rgba(243,210,162,0.3)] hover:shadow-[0_0_45px_rgba(243,210,162,0.6)] hover:scale-[1.02] transition-all duration-300 flex items-center gap-2.5"
           >
-            <span className="relative z-10 flex items-center gap-2">
-              EXPLORE ARTIFACTS
-              <ArrowDownRight className="w-4 h-4 group-hover:translate-x-1 group-hover:translate-y-1 transition-transform" />
-            </span>
-            <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-25 transition-opacity" />
+            <Bug className="w-4 h-4 text-black group-hover:rotate-45 transition-transform" />
+            <span>{buttonMessage}</span>
           </button>
 
           <button
-            onClick={() => {
-              sound.playTerminal();
-              onOpenTerminal();
-            }}
+            onClick={scrollToContact}
             onMouseEnter={() => sound.playHover()}
-            className="px-6 py-3.5 rounded-xl bg-slate-900/80 border border-cyan-500/30 text-cyan-300 font-mono text-xs sm:text-sm font-semibold tracking-wider uppercase hover:bg-cyan-950/40 hover:border-cyan-400 hover:shadow-[0_0_25px_rgba(0,240,255,0.2)] transition-all duration-300 flex items-center gap-2 backdrop-blur-md"
+            className="px-6 py-3.5 rounded-xl bg-[#13111b]/90 border border-white/10 text-white font-sans text-xs sm:text-sm font-semibold tracking-wide hover:border-[#f3d2a2]/50 hover:bg-white/5 transition-all duration-300 flex items-center gap-2 backdrop-blur-md"
           >
-            <TerminalIcon className="w-4 h-4 text-cyan-400" />
-            <span>ACCESS TERMINAL</span>
+            <Mail className="w-4 h-4 text-[#f3d2a2]" />
+            <span>Drop Me an Email</span>
           </button>
+        </div>
+
+        {/* Playful Realtime Developer Badges */}
+        <div className="pointer-events-auto grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full max-w-2xl font-mono text-xs">
+          <div className="p-3 rounded-xl bg-[#13111b]/70 border border-white/5 flex items-center gap-2.5">
+            <Coffee className="w-4 h-4 text-[#f3d2a2]" />
+            <div>
+              <div className="text-[10px] text-[#a39ea8]">Chai / Coffee</div>
+              <div className="font-bold text-white">4.5 Cups / day</div>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-[#13111b]/70 border border-white/5 flex items-center gap-2.5">
+            <Bug className="w-4 h-4 text-[#f2b8c6]" />
+            <div>
+              <div className="text-[10px] text-[#a39ea8]">Bugs Created</div>
+              <div className="font-bold text-white">{bugClicks > 0 ? `${bugClicks * 2} new` : 'Plenty'}</div>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-[#13111b]/70 border border-white/5 flex items-center gap-2.5">
+            <Sparkles className="w-4 h-4 text-[#d8a7ff]" />
+            <div>
+              <div className="text-[10px] text-[#a39ea8]">Localhost Faith</div>
+              <div className="font-bold text-white">100% Solid</div>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-[#13111b]/70 border border-white/5 flex items-center gap-2.5">
+            <Laugh className="w-4 h-4 text-[#e8a87c]" />
+            <div>
+              <div className="text-[10px] text-[#a39ea8]">AI Jargon</div>
+              <div className="font-bold text-white">0% Banned</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Bottom Telemetry Ticker */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto pt-6 border-t border-cyan-500/15 flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-400 gap-3 pointer-events-none">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-1.5 text-cyan-400">
-            <Cpu className="w-3.5 h-3.5" />
-            <span>RENDER ENGINE: WEBGL / THREE.JS</span>
-          </div>
-          <div className="hidden sm:flex items-center gap-1.5 text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            <span>LATENCY: &lt;10MS</span>
-          </div>
+      {/* Bottom Aesthetic Telemetry Bar */}
+      <div className="relative z-10 w-full max-w-5xl mx-auto pt-8 border-t border-white/10 flex flex-wrap items-center justify-between text-xs font-mono text-[#a39ea8] gap-3 pointer-events-none">
+        <div className="flex items-center gap-2 text-[#f3d2a2]">
+          <span className="w-2 h-2 rounded-full bg-[#f3d2a2] animate-ping" />
+          <span>REAL-TIME 3D LIQUID SHADER: ACTIVE</span>
         </div>
 
-        <div className="flex items-center gap-4 text-slate-500">
-          <span>COORDINATES: 28°N 77°E</span>
-          <span className="hidden md:inline text-cyan-500/70">ROTATION: ACTIVE</span>
-          <span className="text-slate-400">SCROLL TO ENGAGE ↓</span>
+        <div className="flex items-center gap-4">
+          <span className="hidden sm:inline">DRAG CANVAS TO ROTATE SCULPTURE</span>
+          <span className="text-[#fdfbf7]">SCROLL FOR STORY ↓</span>
         </div>
       </div>
     </section>

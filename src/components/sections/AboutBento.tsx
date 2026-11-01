@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layers, Zap, Database, Terminal, ShieldCheck, Globe, Code, ArrowUpRight } from 'lucide-react';
+import { Sparkles, Terminal, Code2, Heart, Coffee, Globe, ArrowUpRight } from 'lucide-react';
 import { sound } from '../../utils/audio';
 
 interface BentoCardProps {
@@ -11,7 +11,7 @@ interface BentoCardProps {
 const BentoCard: React.FC<BentoCardProps> = ({
   children,
   className = '',
-  glowColor = 'rgba(0, 240, 255, 0.15)',
+  glowColor = 'rgba(243, 210, 162, 0.12)',
 }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
@@ -32,7 +32,7 @@ const BentoCard: React.FC<BentoCardProps> = ({
         sound.playHover();
       }}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative overflow-hidden rounded-2xl bg-[#090e1a]/70 backdrop-blur-xl border border-white/10 transition-all duration-300 hover:border-cyan-500/40 p-6 flex flex-col justify-between group ${className}`}
+      className={`relative overflow-hidden rounded-2xl bg-[#121019]/75 backdrop-blur-xl border border-white/10 transition-all duration-300 hover:border-[#f3d2a2]/40 p-6 flex flex-col justify-between group ${className}`}
     >
       {/* Dynamic Cursor Spotlight Glare */}
       {isHovered && (
@@ -50,132 +50,85 @@ const BentoCard: React.FC<BentoCardProps> = ({
 
 export const AboutBento: React.FC = () => {
   return (
-    <section id="about" className="relative w-full py-24 px-4 sm:px-8 max-w-6xl mx-auto">
+    <section id="about" className="relative w-full py-24 px-4 sm:px-8 max-w-5xl mx-auto">
       {/* Section Header */}
       <div className="mb-14">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/40 border border-cyan-500/20 text-cyan-400 text-xs font-mono mb-3">
-          <Layers className="w-3.5 h-3.5" />
-          <span>MODULE // 01: ARCHITECTURAL OVERVIEW</span>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-[#f3d2a2]/20 text-[#f3d2a2] text-xs font-mono mb-4">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>HUMAN STORY & ETHOS</span>
         </div>
-        <h2 className="text-3xl sm:text-5xl font-black font-display tracking-tight text-white uppercase">
-          ENGINEERED FOR <span className="text-gradient-cyan">EXTREME IMPACT</span>
+        <h2 className="text-3xl sm:text-6xl font-megante tracking-normal text-white uppercase leading-tight">
+          BUILDING DIGITAL EXPERIENCES <span className="text-gradient-aurora italic">THAT MATTER</span>
         </h2>
-        <p className="text-slate-400 max-w-2xl text-sm sm:text-base mt-2">
-          Deconstructing digital interfaces into lightning-fast MERN backends, distributed data pipelines, and jaw-dropping interactive 3D visualizations.
+        <p className="text-[#a39ea8] max-w-2xl text-sm sm:text-base mt-3 leading-relaxed">
+          I'm Dhruv Tanwar — a full-stack developer obsessed with high-performance MERN architecture, modern web design, and expressive 3D visuals. No clichés, just craft.
         </p>
       </div>
 
-      {/* Bento Grid Layout */}
+      {/* Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-        {/* Card 1: The Full-Stack Core (Wide 2-columns) */}
-        <BentoCard className="md:col-span-2 min-h-[300px]">
+        {/* Card 1: Core Philosophy */}
+        <BentoCard className="md:col-span-2 min-h-[280px]">
           <div className="flex items-center justify-between mb-4">
-            <span className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-              <Zap className="w-6 h-6" />
+            <span className="p-2.5 rounded-xl bg-[#f3d2a2]/10 border border-[#f3d2a2]/20 text-[#f3d2a2]">
+              <Code2 className="w-5 h-5" />
             </span>
-            <span className="font-mono text-xs text-slate-500 uppercase tracking-widest">
-              PARADIGM // 01
+            <span className="font-mono text-xs text-[#a39ea8] uppercase tracking-wider">
+              PHILOSOPHY
             </span>
           </div>
-          <h3 className="text-2xl font-bold font-display text-white mb-2 group-hover:text-cyan-300 transition-colors">
-            Full-Stack Modern MERN & WebGL Symbiosis
+          <h3 className="text-2xl font-megante text-white mb-2 group-hover:text-[#f3d2a2] transition-colors">
+            Taste Over Templates
           </h3>
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
-            I don't just build websites; I craft comprehensive, resilient software systems. From real-time WebSocket state machines, MongoDB data modeling, and Express APIs, to Three.js WebGL shaders that give users goosebumps on the first second of page load.
+          <p className="text-[#eae6df] text-sm sm:text-base leading-relaxed mb-6 font-sans">
+            Every developer can spin up an AI generator and prompt a page in 30 seconds. What can’t be automated is taste, nuance, micro-interactions, and the patience to hand-tune shaders, physics, and scalable database schemas until they feel buttery smooth.
           </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/5 font-mono text-xs">
             <div className="p-3 rounded-lg bg-black/40 border border-white/5">
-              <div className="text-cyan-400 font-bold text-lg">MERN</div>
-              <div className="text-slate-400 text-[11px]">Core Backbone</div>
+              <div className="text-[#f3d2a2] font-bold text-lg font-megante">MERN</div>
+              <div className="text-[#a39ea8] text-[11px]">Robust Engine</div>
             </div>
             <div className="p-3 rounded-lg bg-black/40 border border-white/5">
-              <div className="text-emerald-400 font-bold text-lg">GLSL</div>
-              <div className="text-slate-400 text-[11px]">Realtime Shaders</div>
+              <div className="text-[#d8a7ff] font-bold text-lg font-megante">THREE.JS</div>
+              <div className="text-[#a39ea8] text-[11px]">3D Realtime</div>
             </div>
             <div className="p-3 rounded-lg bg-black/40 border border-white/5">
-              <div className="text-purple-400 font-bold text-lg">&lt;100ms</div>
-              <div className="text-slate-400 text-[11px]">API Response</div>
+              <div className="text-[#f2b8c6] font-bold text-lg font-megante">GLSL</div>
+              <div className="text-[#a39ea8] text-[11px]">Custom Shaders</div>
             </div>
             <div className="p-3 rounded-lg bg-black/40 border border-white/5">
-              <div className="text-pink-400 font-bold text-lg">60+ FPS</div>
-              <div className="text-slate-400 text-[11px]">Fluid Motion</div>
+              <div className="text-[#e8a87c] font-bold text-lg font-megante">100%</div>
+              <div className="text-[#a39ea8] text-[11px]">Human Crafted</div>
             </div>
           </div>
         </BentoCard>
 
         {/* Card 2: Status & Availability */}
-        <BentoCard className="min-h-[300px]" glowColor="rgba(16, 185, 129, 0.15)">
+        <BentoCard className="min-h-[280px]" glowColor="rgba(216, 167, 255, 0.15)">
           <div className="flex items-center justify-between mb-4">
-            <span className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-              <Globe className="w-6 h-6" />
+            <span className="p-2.5 rounded-xl bg-[#d8a7ff]/10 border border-[#d8a7ff]/20 text-[#d8a7ff]">
+              <Globe className="w-5 h-5" />
             </span>
-            <span className="font-mono text-xs text-emerald-400 flex items-center gap-1.5 font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              AVAILABLE
+            <span className="font-mono text-xs text-[#d8a7ff] flex items-center gap-1.5 font-semibold">
+              <span className="w-2 h-2 rounded-full bg-[#d8a7ff] animate-pulse" />
+              OPEN FOR WORK
             </span>
           </div>
-          <h3 className="text-xl font-bold font-display text-white mb-2">
-            Status & Deployment
+          <h3 className="text-xl font-megante text-white mb-2">
+            Available for Select Projects
           </h3>
-          <p className="text-slate-300 text-sm leading-relaxed mb-6">
-            Currently accepting select engineering opportunities, high-impact freelance projects, and forward-thinking collaborative builds.
+          <p className="text-[#eae6df] text-sm leading-relaxed mb-6 font-sans">
+            Ready to contribute to ambitious engineering teams, forward-looking startups, or unique creative commissions.
           </p>
           <a
             href="#contact"
             onClick={() => sound.playClick()}
-            className="mt-auto inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 font-mono text-xs font-bold uppercase tracking-wider hover:bg-emerald-500/20 hover:border-emerald-400 transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+            className="mt-auto inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#d8a7ff]/10 border border-[#d8a7ff]/30 text-[#d8a7ff] font-sans text-xs font-bold uppercase tracking-wider hover:bg-[#d8a7ff]/20 hover:border-[#d8a7ff] transition-all"
           >
-            <span>TRANSMIT INQUIRY</span>
+            <span>GET IN TOUCH</span>
             <ArrowUpRight className="w-4 h-4" />
           </a>
-        </BentoCard>
-
-        {/* Card 3: Philosophy */}
-        <BentoCard className="min-h-[260px]" glowColor="rgba(168, 85, 247, 0.15)">
-          <div className="flex items-center justify-between mb-4">
-            <span className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
-              <ShieldCheck className="w-6 h-6" />
-            </span>
-            <span className="font-mono text-xs text-slate-500 uppercase tracking-widest">
-              STANDARDS
-            </span>
-          </div>
-          <h3 className="text-xl font-bold font-display text-white mb-2">
-            Zero Compromises
-          </h3>
-          <p className="text-slate-300 text-sm leading-relaxed">
-            Every route is optimized, every database query indexed, every animation GPU-accelerated. If it lags, it does not ship.
-          </p>
-        </BentoCard>
-
-        {/* Card 4: Code Radar (Wide 2-columns) */}
-        <BentoCard className="md:col-span-2 min-h-[260px]">
-          <div className="flex items-center justify-between mb-4">
-            <span className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
-              <Code className="w-6 h-6" />
-            </span>
-            <span className="font-mono text-xs text-slate-500 uppercase tracking-widest">
-              TOOLING MATRIX
-            </span>
-          </div>
-          <h3 className="text-xl font-bold font-display text-white mb-2">
-            Battle-Tested Technologies
-          </h3>
-          <p className="text-slate-300 text-sm mb-4">
-            A fluid arsenal spanning modern JavaScript, React, Node.js, Express, MongoDB, Three.js, GLSL, Tailwind CSS, TypeScript, and Docker.
-          </p>
-          <div className="flex flex-wrap gap-2 font-mono text-xs">
-            {['React', 'Next.js', 'Node.js', 'Express', 'MongoDB', 'Three.js', 'GLSL', 'TypeScript', 'TailwindCSS', 'GSAP', 'Vite', 'Git', 'REST APIs', 'WebSockets'].map((tech) => (
-              <span
-                key={tech}
-                onMouseEnter={() => sound.playHover()}
-                className="px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/10 text-slate-300 hover:text-cyan-300 hover:border-cyan-500/40 hover:bg-cyan-500/10 transition-all cursor-default"
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
         </BentoCard>
       </div>
     </section>

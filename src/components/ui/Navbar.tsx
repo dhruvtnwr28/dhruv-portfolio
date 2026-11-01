@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Terminal as TerminalIcon, Volume2, VolumeX, Github, Menu, X, Radio } from 'lucide-react';
+import { Volume2, VolumeX, Github, Menu, X, Sparkles } from 'lucide-react';
 import { sound } from '../../utils/audio';
 
 interface NavbarProps {
-  onOpenTerminal: () => void;
   soundEnabled: boolean;
   onToggleSound: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
-  onOpenTerminal,
   soundEnabled,
   onToggleSound,
 }) => {
@@ -25,10 +23,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, []);
 
   const navLinks = [
-    { name: 'About', href: '#about' },
-    { name: 'Projects', href: '#projects' },
-    { name: 'Skills', href: '#skills' },
-    { name: 'Transmitter', href: '#contact' },
+    { name: 'Philosophy', href: '#about' },
+    { name: 'Capabilities', href: '#skills' },
+    { name: 'Say Hello', href: '#contact' },
   ];
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -44,42 +41,41 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="fixed top-0 left-0 right-0 z-40 flex justify-center px-4 py-4 sm:py-6 transition-all duration-300">
       <nav
-        className={`w-full max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-2.5 rounded-2xl transition-all duration-300 ${
+        className={`w-full max-w-5xl mx-auto flex items-center justify-between px-5 sm:px-7 py-3 rounded-2xl transition-all duration-300 ${
           scrolled
-            ? 'bg-[#090d1a]/85 backdrop-blur-xl border border-cyan-500/25 shadow-[0_4px_30px_rgba(0,0,0,0.8),0_0_20px_rgba(0,240,255,0.1)]'
-            : 'bg-[#090d1a]/50 backdrop-blur-md border border-white/10'
+            ? 'bg-[#121019]/80 backdrop-blur-xl border border-[#f3d2a2]/20 shadow-[0_10px_35px_rgba(0,0,0,0.6)]'
+            : 'bg-[#121019]/40 backdrop-blur-md border border-white/5'
         }`}
       >
         {/* Brand / Logo */}
         <a
           href="#"
-          className="flex items-center gap-2.5 group"
+          className="flex items-center gap-3 group"
           onClick={() => sound.playClick()}
         >
-          <div className="relative w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center font-mono font-bold text-black text-sm shadow-[0_0_15px_rgba(0,240,255,0.5)] group-hover:scale-105 transition-transform">
-            <span>DT</span>
-            <div className="absolute inset-0 rounded-lg bg-cyan-400 opacity-0 group-hover:opacity-40 blur transition-opacity" />
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#f3d2a2] to-[#d8a7ff] flex items-center justify-center font-megante font-bold text-black text-sm shadow-[0_0_20px_rgba(243,210,162,0.4)] group-hover:scale-105 transition-transform">
+            <span>D</span>
           </div>
           <div className="flex flex-col">
-            <span className="font-display font-bold text-sm tracking-wide text-slate-100 group-hover:text-cyan-300 transition-colors">
+            <span className="font-megante text-base tracking-wider text-[#fdfbf7] group-hover:text-[#f3d2a2] transition-colors">
               DHRUV TANWAR
             </span>
-            <span className="text-[10px] font-mono text-cyan-400/80 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              ONLINE // MERN ARCHITECT
+            <span className="text-[10px] font-mono text-[#d8a7ff]/80 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#f3d2a2] animate-pulse" />
+              STATUS: COOKING 🍳
             </span>
           </div>
         </a>
 
         {/* Desktop Nav Links */}
-        <div className="hidden md:flex items-center gap-1 bg-white/[0.03] border border-white/[0.05] rounded-full px-3 py-1">
+        <div className="hidden md:flex items-center gap-1 bg-white/[0.03] border border-white/[0.06] rounded-full px-4 py-1.5">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
               onClick={(e) => handleLinkClick(e, link.href)}
               onMouseEnter={() => sound.playHover()}
-              className="px-3.5 py-1 text-xs font-mono text-slate-300 hover:text-cyan-300 hover:bg-cyan-500/10 rounded-full transition-all duration-200"
+              className="px-4 py-1 text-xs font-sans tracking-wide text-slate-300 hover:text-[#f3d2a2] hover:bg-white/5 rounded-full transition-all duration-200"
             >
               {link.name}
             </a>
@@ -95,38 +91,25 @@ export const Navbar: React.FC<NavbarProps> = ({
               sound.playClick();
             }}
             onMouseEnter={() => sound.playHover()}
-            className="p-2 rounded-xl bg-slate-900/60 border border-slate-700/50 text-slate-300 hover:text-cyan-300 hover:border-cyan-500/40 transition-all"
-            title={soundEnabled ? 'Mute procedural soundscapes' : 'Enable procedural soundscapes'}
+            className="p-2 rounded-xl bg-white/[0.03] border border-white/10 text-slate-300 hover:text-[#f3d2a2] hover:border-[#f3d2a2]/40 transition-all"
+            title={soundEnabled ? 'Mute ambient soundscapes' : 'Enable ambient soundscapes'}
             aria-label="Toggle Sound"
           >
             {soundEnabled ? (
-              <Volume2 className="w-4 h-4 text-cyan-400 animate-pulse" />
+              <Volume2 className="w-4 h-4 text-[#f3d2a2]" />
             ) : (
               <VolumeX className="w-4 h-4 text-slate-500" />
             )}
           </button>
 
-          {/* Interactive Terminal Trigger */}
-          <button
-            onClick={() => {
-              sound.playTerminal();
-              onOpenTerminal();
-            }}
-            onMouseEnter={() => sound.playHover()}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/40 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-medium hover:bg-cyan-500/20 hover:shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all"
-          >
-            <TerminalIcon className="w-3.5 h-3.5" />
-            <span>[~] CLI</span>
-          </button>
-
-          {/* GitHub Direct Link */}
+          {/* GitHub Link */}
           <a
             href="https://github.com/dhruvtnwr28"
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => sound.playClick()}
             onMouseEnter={() => sound.playHover()}
-            className="p-2 rounded-xl bg-slate-900/60 border border-slate-700/50 text-slate-300 hover:text-white hover:border-cyan-500/40 transition-all"
+            className="p-2 rounded-xl bg-white/[0.03] border border-white/10 text-slate-300 hover:text-white hover:border-[#f3d2a2]/40 transition-all"
             title="GitHub Profile"
             aria-label="GitHub Profile"
           >
@@ -139,8 +122,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               sound.playClick();
               setMobileMenuOpen(!mobileMenuOpen);
             }}
-            className="md:hidden p-2 rounded-xl bg-slate-900/60 border border-slate-700/50 text-slate-300"
-            aria-label="Open Navigation Menu"
+            className="md:hidden p-2 rounded-xl bg-white/[0.03] border border-white/10 text-slate-300"
+            aria-label="Toggle Navigation"
           >
             {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
@@ -149,30 +132,18 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed top-20 left-4 right-4 bg-[#090d1a]/95 border border-cyan-500/30 rounded-2xl p-5 shadow-[0_10px_40px_rgba(0,0,0,0.9)] backdrop-blur-2xl flex flex-col gap-3 font-mono text-sm z-50">
+        <div className="md:hidden fixed top-20 left-4 right-4 bg-[#121019]/95 border border-[#f3d2a2]/30 rounded-2xl p-5 shadow-2xl backdrop-blur-2xl flex flex-col gap-3 font-sans text-sm z-50">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
               onClick={(e) => handleLinkClick(e, link.href)}
-              className="py-2.5 px-3 rounded-lg text-slate-200 hover:bg-cyan-500/10 hover:text-cyan-300 transition-colors flex items-center justify-between"
+              className="py-2.5 px-3 rounded-lg text-slate-200 hover:bg-white/5 hover:text-[#f3d2a2] transition-colors flex items-center justify-between"
             >
               <span>{link.name}</span>
-              <span className="text-cyan-500 text-xs">➜</span>
+              <span className="text-[#f3d2a2] text-xs">✦</span>
             </a>
           ))}
-          <div className="pt-2 border-t border-slate-800 flex justify-between items-center">
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenTerminal();
-              }}
-              className="w-full py-2.5 px-3 rounded-lg bg-cyan-950/60 border border-cyan-500/40 text-cyan-300 flex items-center justify-center gap-2 font-mono text-xs font-semibold"
-            >
-              <TerminalIcon className="w-4 h-4" />
-              <span>LAUNCH CYBER TERMINAL</span>
-            </button>
-          </div>
         </div>
       )}
     </header>
