@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Code2, Globe, ArrowUpRight, Flame, Compass } from 'lucide-react';
+import { Sparkles, Code2, Globe, ArrowUpRight, Flame, Compass, Box } from 'lucide-react';
 import { Magnetic } from '../ui/Magnetic';
 import { sound } from '../../utils/audio';
 
@@ -12,7 +12,7 @@ interface BentoCardProps {
 const BentoCard: React.FC<BentoCardProps> = ({
   children,
   className = '',
-  glowColor = 'rgba(243, 210, 162, 0.12)',
+  glowColor = 'rgba(0, 240, 255, 0.15)',
 }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
@@ -33,9 +33,9 @@ const BentoCard: React.FC<BentoCardProps> = ({
         sound.playHover();
       }}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative overflow-hidden rounded-3xl bg-[#121019]/75 backdrop-blur-xl border border-white/10 transition-all duration-300 hover:border-[#f3d2a2]/40 p-7 flex flex-col justify-between group ${className}`}
+      className={`relative overflow-hidden rounded-3xl bg-[#060f26]/75 backdrop-blur-xl border border-[#00f0ff]/15 transition-all duration-300 hover:border-[#00f0ff]/45 p-7 flex flex-col justify-between group shadow-xl ${className}`}
     >
-      {/* Dynamic Cursor Spotlight Glare */}
+      {/* Dynamic Cyan Cursor Spotlight Glare */}
       {isHovered && (
         <div
           className="pointer-events-none absolute -inset-px transition-opacity duration-300"
@@ -54,15 +54,15 @@ export const AboutBento: React.FC = () => {
     <section id="about" className="relative w-full py-28 px-4 sm:px-8 max-w-6xl mx-auto">
       {/* Section Header */}
       <div className="mb-16">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-[#f3d2a2]/20 text-[#f3d2a2] text-xs font-mono mb-4">
-          <Compass className="w-3.5 h-3.5" />
-          <span>[ MANIFESTO // 01 ]</span>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/30 text-[#00f0ff] text-xs font-mono mb-4 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+          <Box className="w-3.5 h-3.5" />
+          <span>[ TESSERACT MANIFESTO ]</span>
         </div>
         <h2 className="text-3xl sm:text-6xl md:text-7xl font-megante tracking-tight text-white uppercase leading-tight">
-          CRAFTING EXPERIENCES <span className="text-gradient-aurora italic">WITH SOUL</span>
+          CRAFTING SYSTEMS <span className="text-gradient-tesseract italic">WITH RAW ENERGY</span>
         </h2>
-        <p className="text-[#a39ea8] max-w-2xl text-sm sm:text-base mt-3 leading-relaxed font-sans">
-          I'm Dhruv Tanwar — an engineer combining robust full-stack architecture with fluid 3D graphics and typography. No generic templates, no cutting corners.
+        <p className="text-slate-400 max-w-2xl text-sm sm:text-base mt-3 leading-relaxed font-sans">
+          I'm Dhruv Tanwar — an engineer combining scalable full-stack MERN architecture with real-time 3D WebGL graphics and sharp visual precision.
         </p>
       </div>
 
@@ -71,65 +71,65 @@ export const AboutBento: React.FC = () => {
         {/* Card 1: Core Philosophy */}
         <BentoCard className="md:col-span-2 min-h-[300px]">
           <div className="flex items-center justify-between mb-4">
-            <span className="p-2.5 rounded-2xl bg-[#f3d2a2]/10 border border-[#f3d2a2]/20 text-[#f3d2a2]">
+            <span className="p-2.5 rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/25 text-[#00f0ff]">
               <Flame className="w-5 h-5" />
             </span>
-            <span className="font-mono text-xs text-[#a39ea8] uppercase tracking-widest">
+            <span className="font-mono text-xs text-[#38bdf8] uppercase tracking-widest">
               PARADIGM
             </span>
           </div>
-          <h3 className="text-2xl sm:text-3xl font-megante text-white mb-3 group-hover:text-[#f3d2a2] transition-colors">
+          <h3 className="text-2xl sm:text-3xl font-megante text-white mb-3 group-hover:text-[#00f0ff] transition-colors">
             Taste Over Templates
           </h3>
-          <p className="text-[#f7f5f2] text-sm sm:text-base leading-relaxed mb-6 font-sans">
-            Every tool can output a template in seconds. True digital presence comes from nuance: hand-calculated GLSL optical dispersion, physics-weighted momentum scrolling, resilient distributed MERN endpoints, and typography that commands the room.
+          <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6 font-sans">
+            AI can generate boilerplate in seconds. What requires true craft is intentional design: calculating volumetric GLSL plasma noise, tuning physics-weighted momentum, and constructing resilient distributed backends that never bottleneck under pressure.
           </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-5 border-t border-white/5 font-mono text-xs">
             <div className="p-3.5 rounded-xl bg-black/40 border border-white/5">
-              <div className="text-[#f3d2a2] font-bold text-lg font-megante">MERN</div>
-              <div className="text-[#a39ea8] text-[11px]">Resilient Core</div>
+              <div className="text-[#00f0ff] font-bold text-lg font-megante">MERN</div>
+              <div className="text-slate-400 text-[11px]">Resilient Core</div>
             </div>
             <div className="p-3.5 rounded-xl bg-black/40 border border-white/5">
-              <div className="text-[#d8b4fe] font-bold text-lg font-megante">THREE.JS</div>
-              <div className="text-[#a39ea8] text-[11px]">Liquid 3D</div>
+              <div className="text-[#38bdf8] font-bold text-lg font-megante">THREE.JS</div>
+              <div className="text-slate-400 text-[11px]">Tesseract 3D</div>
             </div>
             <div className="p-3.5 rounded-xl bg-black/40 border border-white/5">
-              <div className="text-[#fbcfe8] font-bold text-lg font-megante">GLSL</div>
-              <div className="text-[#a39ea8] text-[11px]">Chromatic Prism</div>
+              <div className="text-[#60a5fa] font-bold text-lg font-megante">GLSL</div>
+              <div className="text-slate-400 text-[11px]">Plasma Core</div>
             </div>
             <div className="p-3.5 rounded-xl bg-black/40 border border-white/5">
-              <div className="text-[#e8a87c] font-bold text-lg font-megante">100%</div>
-              <div className="text-[#a39ea8] text-[11px]">Human Touch</div>
+              <div className="text-white font-bold text-lg font-megante">100%</div>
+              <div className="text-slate-400 text-[11px]">Human Touch</div>
             </div>
           </div>
         </BentoCard>
 
         {/* Card 2: Status & Availability */}
-        <BentoCard className="min-h-[300px]" glowColor="rgba(216, 180, 254, 0.15)">
+        <BentoCard className="min-h-[300px]" glowColor="rgba(56, 189, 248, 0.2)">
           <div className="flex items-center justify-between mb-4">
-            <span className="p-2.5 rounded-2xl bg-[#d8b4fe]/10 border border-[#d8b4fe]/20 text-[#d8b4fe]">
+            <span className="p-2.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-[#00f0ff]">
               <Globe className="w-5 h-5" />
             </span>
-            <span className="font-mono text-xs text-[#d8b4fe] flex items-center gap-1.5 font-semibold">
-              <span className="w-2 h-2 rounded-full bg-[#d8b4fe] animate-pulse" />
+            <span className="font-mono text-xs text-[#00f0ff] flex items-center gap-1.5 font-semibold">
+              <span className="w-2 h-2 rounded-full bg-[#00f0ff] animate-pulse" />
               AVAILABLE
             </span>
           </div>
           <h3 className="text-xl sm:text-2xl font-megante text-white mb-2">
             Open for Select Collaborations
           </h3>
-          <p className="text-[#eae6df] text-sm leading-relaxed mb-6 font-sans">
+          <p className="text-slate-300 text-sm leading-relaxed mb-6 font-sans">
             Ready to partner with high-ambition teams, forward-thinking startups, and creators building next-generation digital products.
           </p>
           <Magnetic strength={0.3} className="w-full mt-auto">
             <a
               href="#contact"
               onClick={() => sound.playClick()}
-              className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-gradient-to-r from-[#d8b4fe]/20 to-[#f3d2a2]/20 border border-[#d8b4fe]/40 text-[#fdfbf7] font-sans text-xs font-bold uppercase tracking-wider hover:border-[#f3d2a2] hover:shadow-[0_0_20px_rgba(243,210,162,0.3)] transition-all"
+              className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-gradient-to-r from-[#00f0ff]/20 to-[#38bdf8]/20 border border-[#00f0ff]/40 text-white font-sans text-xs font-bold uppercase tracking-wider hover:border-[#00f0ff] hover:shadow-[0_0_25px_rgba(0,240,255,0.4)] transition-all"
             >
               <span>TRANSMIT INQUIRY</span>
-              <ArrowUpRight className="w-4 h-4" />
+              <ArrowUpRight className="w-4 h-4 text-[#00f0ff]" />
             </a>
           </Magnetic>
         </BentoCard>

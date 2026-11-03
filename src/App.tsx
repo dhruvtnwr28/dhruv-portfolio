@@ -13,7 +13,7 @@ import { sound } from './utils/audio';
 export const App: React.FC = () => {
   const [soundEnabled, setSoundEnabled] = useState(true);
 
-  // Initialize Lenis Smooth Inertia Scroll with Awwwards Tuning
+  // Initialize Lenis Smooth Inertia Scroll
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.3,
@@ -42,8 +42,8 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#08070b] text-[#f7f5f2] overflow-x-hidden selection:bg-[#f3d2a2] selection:text-black">
-      {/* Precision Trailing Custom Magnetic Cursor */}
+    <div className="relative min-h-screen bg-[#030712] text-slate-100 overflow-x-hidden selection:bg-[#00f0ff] selection:text-black">
+      {/* Precision Trailing Custom Cyan Cursor */}
       <CustomCursor />
 
       {/* Aesthetic Floating Navbar */}
@@ -62,12 +62,12 @@ export const App: React.FC = () => {
           direction="left"
           text={[
             '✦ DHRUV TANWAR',
-            '[ EXHIBITION // 2026 ]',
+            '[ TESSERACT ENERGY ONLINE ]',
             '✦ SITE UNDER DEVELOPMENT',
-            '✦ LIQUID AVANT-GARDE',
+            '✦ SPACE STONE CORE',
             '✦ FULL-STACK ARCHITECT',
             '✦ WORKS ON MY MACHINE™',
-            '✦ AWWWARDS SOTD INSPIRATION',
+            '✦ 3D GLSL VOLUMETRIC PLASMA',
           ]}
         />
 
@@ -80,11 +80,11 @@ export const App: React.FC = () => {
           direction="right"
           className="border-b-0"
           text={[
-            '✦ CHROMATIC REFRACTION',
-            '✦ HANDCRAFTED GLSL SHADERS',
-            '✦ 0% AI GENERATED TEMPLATES',
-            '✦ TASTE OVER COOKIE-CUTTERS',
-            '✦ MERN & THREE.JS',
+            '✦ BEATING LIVING COSMIC CORE',
+            '✦ HANDCRAFTED THREE.JS SHADERS',
+            '✦ CLICK & DRAG ROTATION',
+            '✦ ZERO COOKIE-CUTTER TEMPLATES',
+            '✦ MERN & WEBGL',
             '✦ COFFEE LEVEL: 99.4%',
           ]}
         />

@@ -26,7 +26,7 @@ export const CustomCursor: React.FC = () => {
 
       const targetElement = e.target as HTMLElement | null;
       if (targetElement) {
-        const interactive = targetElement.closest('button, a, input, textarea, [data-cursor="pointer"]');
+        const interactive = targetElement.closest('button, a, input, textarea, [data-cursor="pointer"], [data-cursor="magnetic"]');
         const customTextElem = targetElement.closest('[data-cursor-text]');
 
         setHovered(!!interactive);
@@ -79,22 +79,22 @@ export const CustomCursor: React.FC = () => {
       {/* Precision inner dot */}
       <div
         ref={dotRef}
-        className="fixed top-0 left-0 w-2 h-2 rounded-full bg-[#f3d2a2] pointer-events-none z-[9999] shadow-[0_0_12px_#f3d2a2] transition-opacity duration-150"
+        className="fixed top-0 left-0 w-2 h-2 rounded-full bg-[#00f0ff] pointer-events-none z-[9999] shadow-[0_0_14px_#00f0ff] transition-opacity duration-150"
       />
 
       {/* Trailing physics ring */}
       <div
         ref={cursorRef}
-        className={`fixed top-0 left-0 pointer-events-none z-[9998] rounded-full border border-[#f3d2a2]/70 backdrop-blur-[1px] transition-all duration-200 flex items-center justify-center ${
+        className={`fixed top-0 left-0 pointer-events-none z-[9998] rounded-full border border-[#00f0ff]/70 backdrop-blur-[1px] transition-all duration-200 flex items-center justify-center ${
           hovered
-            ? 'w-14 h-14 bg-[#f3d2a2]/15 border-[#f3d2a2] scale-110 shadow-[0_0_25px_rgba(243,210,162,0.4)]'
+            ? 'w-14 h-14 bg-[#00f0ff]/15 border-[#00f0ff] scale-110 shadow-[0_0_28px_rgba(0,240,255,0.45)]'
             : clicked
-            ? 'w-7 h-7 bg-[#f3d2a2]/30 scale-90'
+            ? 'w-7 h-7 bg-[#00f0ff]/35 scale-90'
             : 'w-10 h-10'
         }`}
       >
         {cursorText && (
-          <span className="text-[10px] font-mono font-bold tracking-wider text-[#f3d2a2] uppercase">
+          <span className="text-[10px] font-mono font-bold tracking-wider text-[#00f0ff] uppercase">
             {cursorText}
           </span>
         )}

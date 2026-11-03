@@ -24,12 +24,12 @@ const SKILL_GROUPS: SkillGroup[] = [
   },
   {
     id: 'frontend',
-    label: 'Frontend & Liquid WebGL',
+    label: 'Frontend & 3D WebGL',
     icon: <Code className="w-4 h-4" />,
     skills: [
       { name: 'React & Modern JavaScript', highlight: 'State management, custom hooks & performance' },
       { name: 'Three.js & WebGL', highlight: 'Custom geometries, cameras, lights & materials' },
-      { name: 'GLSL Shaders', highlight: 'Vertex displacement & optical chromatic refraction' },
+      { name: 'GLSL Shaders', highlight: 'Volumetric plasma raymarch & procedural noise' },
       { name: 'Tailwind CSS & Motion', highlight: 'Responsive typography & fluid kinetic layouts' },
     ],
   },
@@ -54,20 +54,20 @@ export const SkillsMatrix: React.FC = () => {
     <section id="skills" className="relative w-full py-28 px-4 sm:px-8 max-w-6xl mx-auto">
       {/* Section Header */}
       <div className="mb-16">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-[#f3d2a2]/20 text-[#f3d2a2] text-xs font-mono mb-4">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/30 text-[#00f0ff] text-xs font-mono mb-4 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
           <Cpu className="w-3.5 h-3.5" />
-          <span>[ CAPABILITIES // 02 ]</span>
+          <span>[ THE CAPABILITY ARSENAL ]</span>
         </div>
         <h2 className="text-3xl sm:text-6xl md:text-7xl font-megante tracking-tight text-white uppercase leading-tight">
-          THE TECHNICAL <span className="text-gradient-champagne italic">ARSENAL</span>
+          TOOLS I USE TO <span className="text-gradient-tesseract italic">BUILD REALITY</span>
         </h2>
-        <p className="text-[#a39ea8] max-w-2xl text-sm sm:text-base mt-3 leading-relaxed font-sans">
+        <p className="text-slate-400 max-w-2xl text-sm sm:text-base mt-3 leading-relaxed font-sans">
           A focused stack centered on clean JavaScript, scalable MERN backends, and expressive visual graphics.
         </p>
       </div>
 
       {/* Magnetic Tabs Switcher */}
-      <div className="flex flex-wrap gap-3 mb-10 p-2 rounded-full bg-[#121019]/80 border border-white/10 w-fit backdrop-blur-xl">
+      <div className="flex flex-wrap gap-3 mb-10 p-2 rounded-full bg-[#060f26]/80 border border-[#00f0ff]/20 w-fit backdrop-blur-xl">
         {SKILL_GROUPS.map((group) => {
           const isActive = group.id === activeTab;
           return (
@@ -80,8 +80,8 @@ export const SkillsMatrix: React.FC = () => {
                 onMouseEnter={() => sound.playHover()}
                 className={`flex items-center gap-2 px-6 py-2.5 rounded-full font-sans text-xs sm:text-sm font-semibold transition-all duration-300 ${
                   isActive
-                    ? 'bg-gradient-to-r from-[#f3d2a2] to-[#d8b4fe] text-black shadow-[0_0_25px_rgba(243,210,162,0.35)]'
-                    : 'text-[#a39ea8] hover:text-white hover:bg-white/5'
+                    ? 'bg-gradient-to-r from-[#00f0ff] to-[#38bdf8] text-black shadow-[0_0_25px_rgba(0,240,255,0.45)]'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {group.icon}
@@ -98,15 +98,15 @@ export const SkillsMatrix: React.FC = () => {
           <div
             key={skill.name}
             onMouseEnter={() => sound.playHover()}
-            className="p-6 rounded-3xl bg-[#121019]/70 backdrop-blur-md border border-white/10 hover:border-[#f3d2a2]/40 transition-all duration-300 group"
+            className="p-6 rounded-3xl bg-[#060f26]/75 backdrop-blur-md border border-[#00f0ff]/15 hover:border-[#00f0ff]/45 transition-all duration-300 group shadow-lg"
           >
             <div className="flex items-center gap-3 mb-2">
-              <CheckCircle2 className="w-4 h-4 text-[#f3d2a2] group-hover:scale-110 transition-transform" />
-              <span className="font-megante text-xl text-white group-hover:text-[#f3d2a2] transition-colors">
+              <CheckCircle2 className="w-4 h-4 text-[#00f0ff] group-hover:scale-110 transition-transform" />
+              <span className="font-megante text-xl text-white group-hover:text-[#00f0ff] transition-colors">
                 {skill.name}
               </span>
             </div>
-            <p className="text-[#a39ea8] text-xs sm:text-sm leading-relaxed pl-7 font-sans">
+            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed pl-7 font-sans">
               {skill.highlight}
             </p>
           </div>

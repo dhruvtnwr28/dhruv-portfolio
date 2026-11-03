@@ -12,61 +12,62 @@
 
 @layer base {
   body {
-    background-color: #09080d;
-    color: #f7f5f2;
+    background-color: #030712;
+    color: #f1f5f9;
     font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
     overflow-x: hidden;
   }
 
-  /* Aesthetic Velvet Scrollbar */
+  /* Tesseract Cosmic Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #09080d;
+    background: #030712;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(243, 210, 162, 0.25);
+    background: rgba(0, 240, 255, 0.25);
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(243, 210, 162, 0.6);
+    background: rgba(0, 240, 255, 0.65);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
   }
 }
 
-/* Warm Aesthetic Aurora & Noise Glows */
-.aurora-bg {
+/* Cosmic Tesseract Aurora & Energy Fields */
+.tesseract-bg {
   background-image: 
-    radial-gradient(at 15% 15%, rgba(216, 167, 255, 0.12) 0px, transparent 55%),
-    radial-gradient(at 85% 25%, rgba(243, 210, 162, 0.15) 0px, transparent 50%),
-    radial-gradient(at 50% 80%, rgba(242, 184, 198, 0.08) 0px, transparent 60%);
+    radial-gradient(at 20% 15%, rgba(0, 240, 255, 0.12) 0px, transparent 55%),
+    radial-gradient(at 80% 25%, rgba(29, 78, 216, 0.18) 0px, transparent 60%),
+    radial-gradient(at 50% 75%, rgba(56, 189, 248, 0.08) 0px, transparent 60%);
 }
 
-.text-gradient-champagne {
-  background: linear-gradient(135deg, #ffffff 0%, #f7dfbe 45%, #e8a87c 100%);
+.text-gradient-tesseract {
+  background: linear-gradient(135deg, #ffffff 0%, #00f0ff 45%, #38bdf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.text-gradient-aurora {
-  background: linear-gradient(135deg, #fceade 0%, #f3d2a2 40%, #d8a7ff 100%);
+.text-gradient-cosmic {
+  background: linear-gradient(135deg, #e0f2fe 0%, #38bdf8 45%, #60a5fa 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.glass-aesthetic {
-  background: rgba(19, 17, 27, 0.65);
+.glass-tesseract {
+  background: rgba(6, 15, 38, 0.72);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(243, 210, 162, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.18);
 }
 
-.glass-aesthetic-hover {
+.glass-tesseract-hover {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.glass-aesthetic-hover:hover {
-  border-color: rgba(243, 210, 162, 0.35);
-  box-shadow: 0 10px 40px rgba(243, 210, 162, 0.1);
+.glass-tesseract-hover:hover {
+  border-color: rgba(0, 240, 255, 0.45);
+  box-shadow: 0 10px 40px rgba(0, 240, 255, 0.15);
 }
 
 /* Hide default cursor on desktop when custom cursor is active */

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowUp, Heart, Coffee } from 'lucide-react';
+import { ArrowUp, Coffee } from 'lucide-react';
 import { sound } from '../../utils/audio';
 
 export const Footer: React.FC = () => {
@@ -21,13 +21,13 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="w-full border-t border-white/5 bg-[#07060a] py-12 px-4 sm:px-8 text-[#a39ea8] font-sans text-xs select-none">
-      <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+    <footer className="w-full border-t border-[#00f0ff]/15 bg-[#030712] py-12 px-4 sm:px-8 text-slate-400 font-sans text-xs select-none">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         {/* Left */}
         <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-          <div className="flex items-center gap-2 text-[#f3d2a2] font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#f3d2a2] animate-ping" />
-            <span>IST {time || '23:55:00'}</span>
+          <div className="flex items-center gap-2 text-[#00f0ff] font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00f0ff] animate-ping" />
+            <span>IST {time || '14:45:00'}</span>
           </div>
           <span className="hidden sm:inline text-slate-700">•</span>
           <div className="font-megante text-white text-sm">DHRUV TANWAR</div>
@@ -35,19 +35,20 @@ export const Footer: React.FC = () => {
 
         {/* Center */}
         <div className="flex items-center gap-1.5 text-slate-400">
-          <span>Crafted with</span>
-          <Coffee className="w-3.5 h-3.5 text-[#f3d2a2]" />
-          <span>& 3D WebGL</span>
+          <span>Powered by</span>
+          <span className="text-[#00f0ff] font-semibold">Tesseract 3D Engine</span>
+          <span>&</span>
+          <Coffee className="w-3.5 h-3.5 text-[#38bdf8]" />
         </div>
 
         {/* Right */}
         <button
           onClick={scrollToTop}
           onMouseEnter={() => sound.playHover()}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/10 hover:border-[#f3d2a2]/40 text-slate-300 hover:text-[#f3d2a2] transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] border border-[#00f0ff]/20 hover:border-[#00f0ff] text-slate-300 hover:text-[#00f0ff] hover:shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all"
         >
           <span>BACK TO TOP</span>
-          <ArrowUp className="w-3.5 h-3.5 text-[#f3d2a2]" />
+          <ArrowUp className="w-3.5 h-3.5 text-[#00f0ff]" />
         </button>
       </div>
     </footer>

@@ -10,12 +10,12 @@ interface KineticMarqueeProps {
 export const KineticMarquee: React.FC<KineticMarqueeProps> = ({
   text = [
     '✦ DHRUV TANWAR',
-    '[ EXHIBITION // 2026 ]',
+    '[ TESSERACT ENERGY ONLINE ]',
     '✦ SITE UNDER DEVELOPMENT',
-    '✦ LIQUID AVANT-GARDE',
-    '✦ MERN & WEBGL',
+    '✦ AVENGERS SPACE STONE ENGINE',
+    '✦ MERN & THREE.JS',
     '✦ WORKS ON MY MACHINE™',
-    '✦ TASTE OVER TEMPLATES',
+    '✦ VOLUMETRIC GLSL NEBULA',
   ],
   speed = 1.0,
   direction = 'left',
@@ -36,7 +36,6 @@ export const KineticMarquee: React.FC<KineticMarqueeProps> = ({
       offsetRef.current += move;
 
       if (containerRef.current) {
-        // Continuous wrap
         const width = containerRef.current.scrollWidth / 2;
         if (Math.abs(offsetRef.current) >= width) {
           offsetRef.current = 0;
@@ -53,12 +52,12 @@ export const KineticMarquee: React.FC<KineticMarqueeProps> = ({
   }, [speed, direction]);
 
   return (
-    <div className={`w-full overflow-hidden whitespace-nowrap select-none py-3 border-y border-white/[0.08] bg-[#0c0a12]/60 backdrop-blur-md ${className}`}>
+    <div className={`w-full overflow-hidden whitespace-nowrap select-none py-3 border-y border-[#00f0ff]/20 bg-[#060f26]/60 backdrop-blur-md ${className}`}>
       <div ref={containerRef} className="inline-flex gap-8 will-change-transform">
         {[...text, ...text, ...text].map((item, idx) => (
           <span
             key={idx}
-            className="font-megante text-xs sm:text-sm tracking-widest uppercase text-[#f3d2a2]/90 flex items-center gap-6"
+            className="font-megante text-xs sm:text-sm tracking-widest uppercase text-[#38bdf8]/90 flex items-center gap-6"
           >
             <span>{item}</span>
           </span>

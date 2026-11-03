@@ -10,7 +10,7 @@ export const HeroCanvas3D: React.FC = () => {
 
     // --- Scene, Camera, Renderer ---
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x08070b, 0.015);
+    scene.fog = new THREE.FogExp2(0x030712, 0.015);
 
     const camera = new THREE.PerspectiveCamera(
       45,
@@ -28,24 +28,45 @@ export const HeroCanvas3D: React.FC = () => {
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.35;
     container.appendChild(renderer.domElement);
 
-    // --- Custom GLSL Shaders: Silky Liquid Pearl & Chromatic Glass Core ---
-    const vertexShader = `
-      uniform float uTime;
-      uniform vec2 uMouse;
-      uniform float uMouseSpeed;
-      varying vec3 vNormal;
-      varying vec3 vPosition;
-      varying vec3 vWorldNormal;
-      varying vec3 vEyeVector;
-      varying float vWave;
+    // --- Master Group for the Tesseract ---
+    const tesseractGroup = new THREE.Group();
+    // Default cinematic isometric tilt
+    tesseractGroup.rotation.x = 0.35;
+    tesseractGroup.rotation.y = 0.65;
+    scene.add(tesseractGroup);
 
-      // 3D Simplex Noise
+    // =========================================================================
+    // 1. INNER VOLUMETRIC PLASMA NEBULA CORE (The Cosmic Beating Space Stone)
+    // =========================================================================
+    const innerVertexShader = `
+      uniform float uTime;
+      uniform float uHeartbeat;
+      varying vec3 vPosition;
+      varying vec3 vNormal;
+
+      void main() {
+        vPosition = position;
+        vNormal = normal;
+
+        // Subtle breathing expansion with the heartbeat
+        vec3 displaced = position * (1.0 + uHeartbeat * 0.08);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
+      }
+    `;
+
+    const innerFragmentShader = `
+      uniform float uTime;
+      uniform float uHeartbeat;
+      varying vec3 vPosition;
+      varying vec3 vNormal;
+
+      // 3D Simplex Noise for volumetric cosmic plasma
       vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
       vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
-      
+
       float snoise(vec3 v){
         const vec2 C = vec2(1.0/6.0, 1.0/3.0);
         const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
@@ -93,173 +114,185 @@ export const HeroCanvas3D: React.FC = () => {
       }
 
       void main() {
-        vNormal = normal;
-        vPosition = position;
-        
-        vec4 worldPos = modelMatrix * vec4(position, 1.0);
-        vWorldNormal = normalize(mat3(modelMatrix) * normal);
-        vEyeVector = normalize(worldPos.xyz - cameraPosition);
+        // Multi-layered animated cosmic plasma energy
+        float n1 = snoise(vPosition * 2.2 + vec3(0.0, uTime * 0.45, 0.0));
+        float n2 = snoise(vPosition * 4.0 - vec3(uTime * 0.3, 0.0, uTime * 0.2));
+        float plasma = (n1 * 0.65 + n2 * 0.35) * 0.5 + 0.5;
 
-        // Gentle, silky harmonic fluid breathing (ultra-clean, not lumpy)
-        float wave1 = snoise(position * 1.2 + vec3(uTime * 0.35)) * 0.12;
-        float wave2 = snoise(position * 2.4 - vec3(uTime * 0.2)) * 0.06;
-        
-        // Gentle cursor proximity ripple
-        float mouseDist = length(position.xy - uMouse * 2.2);
-        float mouseWave = smoothstep(2.5, 0.0, mouseDist) * (0.08 + uMouseSpeed * 0.15);
-        
-        vWave = wave1 + wave2 + mouseWave;
-        vec3 displaced = position + normal * vWave;
+        // Radial energy falloff from center (pure white glowing core)
+        float distFromCenter = length(vPosition) / 1.1;
+        float coreIntensity = clamp(1.0 - distFromCenter, 0.0, 1.0);
+        coreIntensity = pow(coreIntensity, 1.3);
 
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(displaced, 1.0);
+        // Heartbeat energy surge
+        float beatGlow = uHeartbeat * 0.7;
+
+        // Authentic Avengers Tesseract Palette:
+        vec3 colCoreWhite = vec3(1.0, 1.0, 1.0);      // Pure blinding white center
+        vec3 colElectric  = vec3(0.0, 0.94, 1.0);     // #00f0ff electric cyan
+        vec3 colDeepBlue  = vec3(0.05, 0.35, 0.95);    // #0d59f2 cosmic sapphire
+        vec3 colVoidBlue  = vec3(0.01, 0.08, 0.35);    // Deep outer perimeter
+
+        // Layer color blend
+        vec3 color = mix(colDeepBlue, colElectric, plasma);
+        color = mix(color, colCoreWhite, coreIntensity * 0.85 + beatGlow * 0.4);
+
+        // Alpha transparency so energy feels volumetric and cloud-like inside the glass
+        float alpha = clamp(0.35 + coreIntensity * 0.5 + plasma * 0.25 + beatGlow * 0.25, 0.0, 0.95);
+
+        gl_FragColor = vec4(color, alpha);
       }
     `;
 
-    const fragmentShader = `
-      uniform float uTime;
+    const innerCoreUniforms = {
+      uTime: { value: 0 },
+      uHeartbeat: { value: 0 },
+    };
+
+    const innerCoreMat = new THREE.ShaderMaterial({
+      vertexShader: innerVertexShader,
+      fragmentShader: innerFragmentShader,
+      uniforms: innerCoreUniforms,
+      transparent: true,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    const innerCoreGeo = new THREE.BoxGeometry(2.0, 2.0, 2.0, 32, 32, 32);
+    const innerCoreMesh = new THREE.Mesh(innerCoreGeo, innerCoreMat);
+    tesseractGroup.add(innerCoreMesh);
+
+    // Secondary Inner Orb (Concentrated singularity light)
+    const innerOrbGeo = new THREE.SphereGeometry(0.75, 32, 32);
+    const innerOrbMat = new THREE.MeshBasicMaterial({
+      color: 0x99f6ff,
+      transparent: true,
+      opacity: 0.65,
+      blending: THREE.AdditiveBlending,
+    });
+    const innerOrbMesh = new THREE.Mesh(innerOrbGeo, innerOrbMat);
+    tesseractGroup.add(innerOrbMesh);
+
+    // =========================================================================
+    // 2. OUTER PRISTINE CRYSTALLINE GLASS CUBE
+    // =========================================================================
+    const outerVertexShader = `
       varying vec3 vNormal;
       varying vec3 vPosition;
       varying vec3 vWorldNormal;
       varying vec3 vEyeVector;
-      varying float vWave;
+
+      void main() {
+        vNormal = normal;
+        vPosition = position;
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        vWorldNormal = normalize(mat3(modelMatrix) * normal);
+        vEyeVector = normalize(worldPos.xyz - cameraPosition);
+
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `;
+
+    const outerFragmentShader = `
+      uniform float uTime;
+      uniform float uHeartbeat;
+      varying vec3 vNormal;
+      varying vec3 vPosition;
+      varying vec3 vWorldNormal;
+      varying vec3 vEyeVector;
 
       void main() {
         vec3 N = normalize(vWorldNormal);
         vec3 V = normalize(vEyeVector);
 
-        // --- Optical Chromatic Dispersion Refraction ---
-        vec3 refrR = refract(V, N, 1.0 / 1.15);
-        vec3 refrG = refract(V, N, 1.0 / 1.18);
-        vec3 refrB = refract(V, N, 1.0 / 1.22);
-
-        float refrLightR = dot(refrR, vec3(0.5, 0.8, 0.6)) * 0.5 + 0.5;
-        float refrLightG = dot(refrG, vec3(-0.6, 0.7, 0.5)) * 0.5 + 0.5;
-        float refrLightB = dot(refrB, vec3(0.7, -0.4, 0.8)) * 0.5 + 0.5;
-
-        // Elegant Fresnel Rim Reflection
+        // Glass Fresnel reflection
         float fresnel = dot(-V, N);
         fresnel = clamp(1.0 - fresnel, 0.0, 1.0);
-        float fresnelPow = pow(fresnel, 2.2);
+        float fresnelPow = pow(fresnel, 2.4);
 
-        // Glossy Specular Molten Sheen
+        // Crisp specular crystal highlights
         vec3 light1 = normalize(vec3(1.5, 2.0, 1.8));
         vec3 half1 = normalize(light1 - V);
-        float spec1 = pow(max(dot(N, half1), 0.0), 48.0);
+        float spec1 = pow(max(dot(N, half1), 0.0), 64.0);
 
-        vec3 light2 = normalize(vec3(-1.8, -1.0, 1.2));
+        vec3 light2 = normalize(vec3(-1.8, -1.2, 1.0));
         vec3 half2 = normalize(light2 - V);
         float spec2 = pow(max(dot(N, half2), 0.0), 32.0);
 
-        // Haute-Couture Palette: Champagne Ivory, Iridescent Opal, Lilac Rose
-        vec3 colChampagne = vec3(0.98, 0.90, 0.78); // #f8e6c7
-        vec3 colLilac     = vec3(0.88, 0.74, 0.98); // #e0bdff
-        vec3 colRose      = vec3(0.98, 0.72, 0.80); // #fbc8ce
-        vec3 colPearl     = vec3(0.98, 0.98, 1.00); // pure pearl highlight
+        // Glass Colors
+        vec3 colCyan = vec3(0.0, 0.94, 1.0);
+        vec3 colIce  = vec3(0.85, 0.95, 1.0);
+        vec3 colDeep = vec3(0.02, 0.12, 0.35);
 
-        // Iridescent Thin-Film Surface Flow
-        float t = sin(uTime * 0.4 + vWave * 4.0) * 0.5 + 0.5;
-        vec3 fluidBase = mix(colChampagne, colLilac, t);
-        fluidBase = mix(fluidBase, colRose, fresnelPow * 0.8);
+        // Base crystal surface tint
+        vec3 surfaceColor = mix(colDeep, colCyan, fresnelPow * 0.9);
+        surfaceColor += colIce * (spec1 * 0.95 + spec2 * 0.35);
+        surfaceColor += colCyan * (uHeartbeat * 0.4);
 
-        // Color dispersion blend
-        vec3 finalColor = vec3(
-          fluidBase.r * refrLightR,
-          fluidBase.g * refrLightG,
-          fluidBase.b * refrLightB
-        );
+        // Edge glow
+        float edgeAlpha = 0.22 + fresnelPow * 0.65 + uHeartbeat * 0.15;
 
-        // Add pure pearl specular highlights
-        finalColor += colPearl * (spec1 * 0.95 + spec2 * 0.4);
-        finalColor += fluidBase * (fresnelPow * 1.1);
-
-        // Deep obsidian ambient base with soft inner glow
-        finalColor = mix(vec3(0.08, 0.07, 0.12), finalColor, 0.82 + fresnelPow * 0.35);
-
-        gl_FragColor = vec4(finalColor, 0.96);
+        gl_FragColor = vec4(surfaceColor, clamp(edgeAlpha, 0.0, 0.92));
       }
     `;
 
-    // 1. Central Hero Sculpture: Smooth Liquid Pearl Sphere
-    const sphereGeo = new THREE.SphereGeometry(1.65, 128, 128);
-    const sphereUniforms = {
+    const outerUniforms = {
       uTime: { value: 0 },
-      uMouse: { value: new THREE.Vector2(0, 0) },
-      uMouseSpeed: { value: 0.0 },
+      uHeartbeat: { value: 0 },
     };
 
-    const sphereMat = new THREE.ShaderMaterial({
-      vertexShader,
-      fragmentShader,
-      uniforms: sphereUniforms,
+    const outerGlassMat = new THREE.ShaderMaterial({
+      vertexShader: outerVertexShader,
+      fragmentShader: outerFragmentShader,
+      uniforms: outerUniforms,
       transparent: true,
       side: THREE.DoubleSide,
+      depthWrite: false,
     });
 
-    const sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
-    scene.add(sphereMesh);
+    const outerBoxGeo = new THREE.BoxGeometry(2.35, 2.35, 2.35);
+    const outerGlassMesh = new THREE.Mesh(outerBoxGeo, outerGlassMat);
+    tesseractGroup.add(outerGlassMesh);
 
-    // 2. Sculptural Minimalist Halo Orbit Rings (Aerodynamic & Luxurious)
-    const ringGroup = new THREE.Group();
-
-    // Ring 1: Champagne Gold Ribbon
-    const ringGeo1 = new THREE.TorusGeometry(2.35, 0.014, 32, 180);
-    const ringMat1 = new THREE.MeshStandardMaterial({
-      color: 0xf3d2a2,
-      metalness: 0.95,
-      roughness: 0.15,
+    // =========================================================================
+    // 3. RAZOR-SHARP LUMINESCENT CUBIC EDGES
+    // =========================================================================
+    const edgesGeo = new THREE.EdgesGeometry(outerBoxGeo);
+    const edgesMat = new THREE.LineBasicMaterial({
+      color: 0x00f0ff,
+      linewidth: 2,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending,
     });
-    const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
-    ring1.rotation.x = Math.PI / 3;
-    ringGroup.add(ring1);
+    const edgesLine = new THREE.LineSegments(edgesGeo, edgesMat);
+    tesseractGroup.add(edgesLine);
 
-    // Ring 2: Lavender Platinum Ring
-    const ringGeo2 = new THREE.TorusGeometry(2.7, 0.009, 32, 180);
-    const ringMat2 = new THREE.MeshStandardMaterial({
-      color: 0xd8b4fe,
-      metalness: 0.92,
-      roughness: 0.18,
-      transparent: true,
-      opacity: 0.6,
-    });
-    const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
-    ring2.rotation.y = Math.PI / 4;
-    ring2.rotation.x = -Math.PI / 6;
-    ringGroup.add(ring2);
+    // =========================================================================
+    // 4. BEATING DYNAMIC POINT LIGHT (Radiates light onto scene)
+    // =========================================================================
+    const tesseractPointLight = new THREE.PointLight(0x00f0ff, 4.0, 10.0);
+    tesseractPointLight.position.set(0, 0, 0);
+    tesseractGroup.add(tesseractPointLight);
 
-    scene.add(ringGroup);
-
-    // 3. Delicate Architectural Outer Polyhedron (Ultra-Fine Champagne Wireframe)
-    const cageGeo = new THREE.IcosahedronGeometry(2.1, 1);
-    const cageMat = new THREE.MeshBasicMaterial({
-      color: 0xf3d2a2,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.16,
-    });
-    const cageMesh = new THREE.Mesh(cageGeo, cageMat);
-    scene.add(cageMesh);
-
-    // 4. Subtle Inner Radiant Luminescence
-    const coreLight = new THREE.PointLight(0xf3d2a2, 1.5, 6.0);
-    scene.add(coreLight);
-
-    const ambientLight = new THREE.AmbientLight(0xfff7ed, 0.9);
+    const ambientLight = new THREE.AmbientLight(0x0284c7, 0.5);
     scene.add(ambientLight);
 
-    // 5. Starlight Dust Particle Field
-    const particleCount = 1200;
+    // =========================================================================
+    // 5. COSMIC ENERGY EMBER DUST PARTICLES
+    // =========================================================================
+    const particleCount = 1000;
     const particlePositions = new Float32Array(particleCount * 3);
     const particleColors = new Float32Array(particleCount * 3);
 
-    const cChampagne = new THREE.Color(0xf3d2a2);
-    const cLilac = new THREE.Color(0xd8b4fe);
+    const cCyan = new THREE.Color(0x00f0ff);
+    const cSky = new THREE.Color(0x38bdf8);
     const cWhite = new THREE.Color(0xffffff);
 
     for (let i = 0; i < particleCount; i++) {
       const idx = i * 3;
-      const r = 2.4 + Math.random() * 7.5;
+      const r = 2.4 + Math.random() * 6.5;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
 
@@ -268,7 +301,7 @@ export const HeroCanvas3D: React.FC = () => {
       particlePositions[idx + 2] = r * Math.cos(phi);
 
       const mix = Math.random();
-      const col = mix > 0.6 ? cChampagne : mix > 0.3 ? cLilac : cWhite;
+      const col = mix > 0.6 ? cCyan : mix > 0.3 ? cSky : cWhite;
       particleColors[idx] = col.r;
       particleColors[idx + 1] = col.g;
       particleColors[idx + 2] = col.b;
@@ -285,7 +318,7 @@ export const HeroCanvas3D: React.FC = () => {
     if (ctx) {
       const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
       grad.addColorStop(0, 'rgba(255,255,255,1)');
-      grad.addColorStop(0.35, 'rgba(243,210,162,0.8)');
+      grad.addColorStop(0.35, 'rgba(0,240,255,0.85)');
       grad.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 32, 32);
@@ -293,7 +326,7 @@ export const HeroCanvas3D: React.FC = () => {
     const particleTexture = new THREE.CanvasTexture(canvas);
 
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.065,
+      size: 0.07,
       vertexColors: true,
       map: particleTexture,
       transparent: true,
@@ -304,10 +337,10 @@ export const HeroCanvas3D: React.FC = () => {
     const particles = new THREE.Points(particleGeometry, particleMaterial);
     scene.add(particles);
 
-    // --- Interactive Mouse & Drag Momentum ---
+    // =========================================================================
+    // 6. INTERACTIVE MOUSE CLICK & DRAG ROTATION
+    // =========================================================================
     const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
-    let mouseSpeed = 0;
-    let prevMouseTime = performance.now();
     let isDragging = false;
     let prevMouseX = 0;
     let prevMouseY = 0;
@@ -329,22 +362,18 @@ export const HeroCanvas3D: React.FC = () => {
       const nx = ((clientX - rect.left) / rect.width) * 2 - 1;
       const ny = -(((clientY - rect.top) / rect.height) * 2 - 1);
 
-      const now = performance.now();
-      const dt = Math.max(now - prevMouseTime, 16);
-      const dist = Math.hypot(nx - mouse.targetX, ny - mouse.targetY);
-      mouseSpeed = Math.min((dist / dt) * 45.0, 1.0);
-      prevMouseTime = now;
-
       mouse.targetX = nx;
       mouse.targetY = ny;
 
       if (isDragging) {
         const deltaX = clientX - prevMouseX;
         const deltaY = clientY - prevMouseY;
-        dragVelocityX = deltaX * 0.005;
-        dragVelocityY = deltaY * 0.005;
-        sphereMesh.rotation.y += dragVelocityX;
-        sphereMesh.rotation.x += dragVelocityY;
+        dragVelocityX = deltaX * 0.007;
+        dragVelocityY = deltaY * 0.007;
+
+        tesseractGroup.rotation.y += dragVelocityX;
+        tesseractGroup.rotation.x += dragVelocityY;
+
         prevMouseX = clientX;
         prevMouseY = clientY;
       }
@@ -387,7 +416,9 @@ export const HeroCanvas3D: React.FC = () => {
     };
     window.addEventListener('resize', handleResize);
 
-    // --- Smooth 60-120 FPS Animation Loop ---
+    // =========================================================================
+    // 7. ANIMATION LOOP: LIVING HEARTBEAT & STEADY ROTATION
+    // =========================================================================
     let animationFrameId: number;
     const clock = new THREE.Clock();
 
@@ -396,41 +427,46 @@ export const HeroCanvas3D: React.FC = () => {
 
       const elapsedTime = clock.getElapsedTime();
 
-      // Lerp mouse
+      // --- Heartbeat Pulse Function (Lub-Dub rhythmic cycle) ---
+      // Pulse fires at ~72 BPM
+      const beatPeriod = 1.6;
+      const cycleTime = elapsedTime % beatPeriod;
+      // First quick pulse (lub)
+      const lub = Math.exp(-Math.pow((cycleTime - 0.25) * 9.0, 2.0));
+      // Second trailing echo pulse (dub)
+      const dub = Math.exp(-Math.pow((cycleTime - 0.55) * 9.0, 2.0)) * 0.6;
+      const heartbeat = lub + dub;
+
+      // Update shader uniforms
+      innerCoreUniforms.uTime.value = elapsedTime;
+      innerCoreUniforms.uHeartbeat.value = heartbeat;
+      outerUniforms.uTime.value = elapsedTime;
+      outerUniforms.uHeartbeat.value = heartbeat;
+
+      // Dynamic light pulse in sync with heartbeat
+      tesseractPointLight.intensity = 3.2 + heartbeat * 4.5;
+      edgesMat.opacity = 0.65 + heartbeat * 0.35;
+      innerOrbMesh.scale.setScalar(1.0 + heartbeat * 0.18);
+
+      // Lerp mouse target for camera parallax
       mouse.x += (mouse.targetX - mouse.x) * 0.05;
       mouse.y += (mouse.targetY - mouse.y) * 0.05;
 
-      mouseSpeed *= 0.94;
-
-      sphereUniforms.uTime.value = elapsedTime;
-      sphereUniforms.uMouse.value.set(mouse.x, mouse.y);
-      sphereUniforms.uMouseSpeed.value = mouseSpeed;
-
-      // Gentle, luxurious core rotation
+      // Automatic gentle rotation + drag momentum inertia
       if (!isDragging) {
-        sphereMesh.rotation.y += 0.004 + dragVelocityX * 0.8;
-        sphereMesh.rotation.x += 0.002 + dragVelocityY * 0.8;
+        tesseractGroup.rotation.y += 0.005 + dragVelocityX * 0.8;
+        tesseractGroup.rotation.x += 0.002 + dragVelocityY * 0.8;
         dragVelocityX *= 0.94;
         dragVelocityY *= 0.94;
       }
 
-      // Gyroscopic halo rotations
-      ring1.rotation.z += 0.006;
-      ring1.rotation.y += 0.004;
-      ring2.rotation.z -= 0.005;
-      ring2.rotation.x += 0.003;
-
-      // Outer delicate cage counter-rotation
-      cageMesh.rotation.y = -sphereMesh.rotation.y * 0.6;
-      cageMesh.rotation.z += 0.002;
-
       // Parallax camera lerp
-      camera.position.x += (mouse.x * 1.1 - camera.position.x) * 0.035;
-      camera.position.y += (mouse.y * 0.85 - camera.position.y) * 0.035;
+      camera.position.x += (mouse.x * 0.9 - camera.position.x) * 0.035;
+      camera.position.y += (mouse.y * 0.7 - camera.position.y) * 0.035;
       camera.lookAt(0, 0, 0);
 
-      // Celestial dust rotation
-      particles.rotation.y = elapsedTime * 0.015;
+      // Cosmic dust rotation
+      particles.rotation.y = elapsedTime * 0.018;
 
       renderer.render(scene, camera);
     };
@@ -447,14 +483,14 @@ export const HeroCanvas3D: React.FC = () => {
       window.removeEventListener('touchend', onPointerUp);
       window.removeEventListener('resize', handleResize);
 
-      sphereGeo.dispose();
-      sphereMat.dispose();
-      ringGeo1.dispose();
-      ringMat1.dispose();
-      ringGeo2.dispose();
-      ringMat2.dispose();
-      cageGeo.dispose();
-      cageMat.dispose();
+      innerCoreGeo.dispose();
+      innerCoreMat.dispose();
+      innerOrbGeo.dispose();
+      innerOrbMat.dispose();
+      outerBoxGeo.dispose();
+      outerGlassMat.dispose();
+      edgesGeo.dispose();
+      edgesMat.dispose();
       particleGeometry.dispose();
       particleMaterial.dispose();
       particleTexture.dispose();
