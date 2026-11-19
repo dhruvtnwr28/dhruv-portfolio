@@ -1,0 +1,29 @@
+<!doctype html>
+<!-- Asset renderer: opens a transparent canvas and draws one relic.
+     Usage: tools/render.html?stone=mind&size=512&t=3  (stone=cube for the cube, bg=1 for sky) -->
+<html><head><meta charset="utf-8"><style>html,body{margin:0;background:transparent}canvas{display:block}</style></head>
+<body><canvas id="c"></canvas>
+<script type="module">
+import { Engine, STONE_SHAPES } from '../js/engine.js';
+import { STONES } from '../js/content.js';
+const q = new URLSearchParams(location.search);
+const size = +(q.get('size') || 512), W = +(q.get('w') || size), H = +(q.get('h') || size);
+const id = q.get('stone') || 'space';
+const bg = q.get('bg') === '1';
+const c = document.getElementById('c');
+c.style.width = W + 'px'; c.style.height = H + 'px';
+const e = new Engine(c, { background: bg, preserve: true });
+e.resize(W, H);
+const st = STONES.find(s => s.id === id);
+Object.assign(e.state, {
+  time: +(q.get('t') || 2.2),
+  obj: [W * +(q.get('x') || .5), H * +(q.get('y') || .5), Math.min(W, H) * +(q.get('r') || .62)],
+  type: id === 'cube' ? 0 : 1,
+  shape: STONE_SHAPES[id] || STONE_SHAPES.space,
+  gem: st ? st.rgb : [0.25, 0.6, 1],
+  col: st ? st.rgb : [0.25, 0.6, 1],
+  vis: 1, quality: 1,
+});
+e.render();
+document.title = 'done';
+</script></body></html>

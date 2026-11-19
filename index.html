@@ -1,18 +1,97 @@
 <!doctype html>
-<html lang="en" class="dark scroll-smooth">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dhruv Tanwar — Under Development</title>
-    <meta name="description" content="Portfolio of Dhruv Tanwar — Full-Stack Developer & Creative Technologist." />
-    <!-- Aesthetic Typography: Syne, Plus Jakarta Sans, Playfair -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Syne:wght@500;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-[#09080d] text-[#f7f5f2] antialiased selection:bg-[#f3d2a2] selection:text-black overflow-x-hidden">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dhruv Tanwar · Six Stones</title>
+  <meta name="description" content="Dhruv Tanwar: full-stack engineer, open-source contributor to Apache Arrow and Uno Platform, research intern at CoSyLab IIIT-Delhi. A portfolio told in six stones." />
+  <meta name="theme-color" content="#05060c" />
+  <meta property="og:title" content="Dhruv Tanwar · Six Stones" />
+  <meta property="og:description" content="A portfolio told in six stones. Find them all." />
+  <meta property="og:image" content="assets/img/og.jpg" />
+  <link rel="icon" href="assets/img/stones/space.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Manrope:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="booting">
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <canvas id="dust" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ===== Prologue ===== -->
+  <div id="intro" role="dialog" aria-label="Introduction">
+    <div class="intro-inner">
+      <p class="intro-line" style="--d:0">Before creation, there were six singularities.</p>
+      <p class="intro-line" style="--d:1">When the universe began, they were forged into stones.</p>
+      <p class="intro-line" style="--d:2">They are scattered across this page.</p>
+      <p class="intro-line big" style="--d:3">Find them.</p>
+      <div class="intro-actions" style="--d:4">
+        <button class="btn btn-primary" data-enter="sound">Enter <small>with sound</small></button>
+        <button class="btn btn-ghost" data-enter="silent">Enter in silence</button>
+      </div>
+    </div>
+    <div class="intro-load"><span></span></div>
+  </div>
+
+  <!-- ===== HUD ===== -->
+  <header class="hud">
+    <a href="#top" class="mono-mark" aria-label="Back to top">D<span>T</span></a>
+    <div class="hud-chapter" aria-live="polite"><span class="hud-num">0</span><span class="hud-name">Prologue</span></div>
+    <div class="hud-actions">
+      <button class="hud-btn" id="realityBtn" aria-pressed="false" title="Shift reality (R)"><i class="dot"></i><span>Reality</span></button>
+      <button class="hud-btn" id="soundBtn" aria-pressed="false" title="Sound (M)"><i class="bars"><b></b><b></b><b></b></i><span>Sound</span></button>
+    </div>
+  </header>
+
+  <!-- ===== The Conduit: six sockets, one snap ===== -->
+  <nav class="conduit" aria-label="Stones and chapters">
+    <div class="conduit-ring" id="sockets"></div>
+    <button class="snap-core" id="snapBtn" disabled aria-label="Snap (needs all six stones)">
+      <span class="snap-count"><b id="stoneCount">0</b>/6</span>
+      <span class="snap-label">Snap</span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="cursor" aria-hidden="true"><i></i></div>
+
+  <main id="top">
+    <!-- Prologue / hero -->
+    <section class="hero" id="prologue" data-chapter="0" data-name="Prologue">
+      <div class="hero-text">
+        <p class="eyebrow dust">A portfolio in six stones</p>
+        <h1 class="hero-name dust"><span>Dhruv</span><span>Tanwar</span></h1>
+        <p class="hero-role dust" data-alt="Professional semicolon hunter · part-time reality bender">Full-stack engineer · open-source contributor · builder of strange, beautiful things</p>
+        <div class="hero-cta dust">
+          <a class="btn btn-primary" href="#space">Begin the hunt</a>
+          <button class="btn btn-ghost" id="skipBtn">Skip, show me everything</button>
+        </div>
+      </div>
+      <div class="relic-anchor hero-relic" data-relic="cube" data-stone="space">
+        <span class="relic-hint">Drag to turn it. Strike it three times.</span>
+        <img class="relic-fallback" src="assets/img/stones/cube.png" alt="" />
+      </div>
+      <div class="scroll-cue" aria-hidden="true"><span></span></div>
+    </section>
+
+    <div id="chapters"></div>
+
+    <footer class="site-foot dust">
+      <p>Built by hand. No templates, no stock art. Every stone is a shader.</p>
+      <p class="mono">© <span id="yr"></span> Dhruv Tanwar · <a href="https://github.com/dhruvtnwr28/dhruv-portfolio">source</a></p>
+    </footer>
+  </main>
+
+  <!-- Snap aftermath -->
+  <div class="aftermath" id="aftermath" role="dialog" aria-label="After the snap">
+    <p class="after-title">Half of everything is gone.</p>
+    <p class="after-sub">One stone can still undo it.</p>
+    <button class="btn btn-time" id="rewindBtn">Turn back time</button>
+  </div>
+
+  <noscript><p style="padding:2rem;color:#ddd;font-family:sans-serif">This portfolio needs JavaScript. Dhruv Tanwar · dhruvtnwr28@gmail.com · github.com/dhruvtnwr28</p></noscript>
+  <script type="module" src="js/app.js"></script>
+</body>
 </html>
