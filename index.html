@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Manrope:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
-<body class="booting">
+<body class="booting letterboxed">
   <canvas id="gl" aria-hidden="true"></canvas>
   <canvas id="dust" aria-hidden="true"></canvas>
   <div class="grain" aria-hidden="true"></div>
@@ -23,11 +23,11 @@
   <!-- ===== Prologue ===== -->
   <div id="intro" role="dialog" aria-label="Introduction">
     <div class="intro-inner">
-      <p class="intro-line" style="--d:0">Before creation, there were six singularities.</p>
-      <p class="intro-line" style="--d:1">When the universe began, they were forged into stones.</p>
-      <p class="intro-line" style="--d:2">They are scattered across this page.</p>
+      <p class="intro-line" style="--d:0">Every system begins as a single point of light.</p>
+      <p class="intro-line" style="--d:1">Dense. Unstable. Waiting to be shaped.</p>
+      <p class="intro-line" style="--d:2">This one broke into six.</p>
       <p class="intro-line big" style="--d:3">Find them.</p>
-      <div class="intro-actions" style="--d:4">
+      <div class="intro-actions" style="--d:4.2">
         <button class="btn btn-primary" data-enter="sound">Enter <small>with sound</small></button>
         <button class="btn btn-ghost" data-enter="silent">Enter in silence</button>
       </div>
@@ -47,6 +47,7 @@
 
   <!-- ===== The Conduit: six sockets, one snap ===== -->
   <nav class="conduit" aria-label="Stones and chapters">
+    <canvas id="conduitGL" aria-hidden="true"></canvas>
     <div class="conduit-ring" id="sockets"></div>
     <button class="snap-core" id="snapBtn" disabled aria-label="Snap (needs all six stones)">
       <span class="snap-count"><b id="stoneCount">0</b>/6</span>
@@ -54,6 +55,9 @@
     </button>
   </nav>
 
+  <div class="letterbox" aria-hidden="true"><i></i><i></i></div>
+  <div class="surge-veil" aria-hidden="true"></div>
+  <div class="mega" id="mega" aria-hidden="true"><p class="mega-title">All six.</p><p class="mega-sub">The universe felt that.</p></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="cursor" aria-hidden="true"><i></i></div>
 

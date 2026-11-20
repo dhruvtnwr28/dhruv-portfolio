@@ -94,6 +94,42 @@ export const sound = {
     o.frequency.value = 41; og.gain.setValueAtTime(0.0001, t + 0.15); og.gain.exponentialRampToValueAtTime(0.35, t + 0.3); og.gain.exponentialRampToValueAtTime(0.0001, t + 3.5);
     o.connect(og).connect(this.master); o.start(t + 0.15); o.stop(t + 3.6);
   },
+  surge(level = 0.5) {
+    if (!this.enabled) return;
+    const c = this.ctx, t = c.currentTime;
+    // sub-bass hit
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(70 + level * 30, t); o.frequency.exponentialRampToValueAtTime(24, t + 1.4);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.7, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
+    o.connect(g).connect(this.master); o.start(t); o.stop(t + 1.7);
+    // crackling roar of energy
+    const n = this._noise(1.6), f = c.createBiquadFilter(), ng = c.createGain();
+    const ws = c.createWaveShaper(); const curve = new Float32Array(256);
+    for (let i = 0; i < 256; i++) { const x = i / 128 - 1; curve[i] = Math.tanh(x * 6); }
+    ws.curve = curve;
+    f.type = 'lowpass'; f.frequency.setValueAtTime(3200, t); f.frequency.exponentialRampToValueAtTime(180, t + 1.4);
+    ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(0.18 + level * 0.15, t + 0.04); ng.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
+    n.connect(ws).connect(f).connect(ng).connect(this.master); n.start(t);
+    this.tint(1); setTimeout(() => this.tint(0), 900);
+  },
+  mega() {
+    if (!this.enabled) return;
+    const c = this.ctx, t = c.currentTime;
+    // rising riser, then the drop
+    const n = this._noise(3.4), f = c.createBiquadFilter(), g = c.createGain();
+    f.type = 'bandpass'; f.Q.value = 3;
+    f.frequency.setValueAtTime(200, t); f.frequency.exponentialRampToValueAtTime(5000, t + 1.9);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 1.8); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.1);
+    n.connect(f).connect(g).connect(this.master); n.start(t);
+    [32, 48, 64.2].forEach((hz, i) => {
+      const o = c.createOscillator(), og = c.createGain();
+      o.type = i ? 'sawtooth' : 'sine'; o.frequency.setValueAtTime(hz * 1.5, t + 1.9); o.frequency.exponentialRampToValueAtTime(hz, t + 4.5);
+      og.gain.setValueAtTime(0.0001, t + 1.9); og.gain.exponentialRampToValueAtTime(i ? 0.08 : 0.8, t + 1.95); og.gain.exponentialRampToValueAtTime(0.0001, t + 5.5);
+      o.connect(og).connect(this.master); o.start(t + 1.9); o.stop(t + 5.6);
+    });
+    setTimeout(() => this.chime(220), 2000);
+  },
   rewind() {
     if (!this.enabled) return;
     const c = this.ctx, t = c.currentTime;
@@ -126,6 +162,14 @@ function loop() {
   for (const p of particles) {
     const k = (now - p.t0) / p.life;
     if (k < 0) continue;
+    if (p.spark) {
+      x.globalAlpha = (1 - k);
+      x.fillStyle = p.c;
+      x.shadowColor = p.c; x.shadowBlur = 6;
+      x.fillRect(p.x + p.vx * k * 70, p.y + p.vy * k * 70 + k * k * 30 - scrollYDelta(p), p.s, p.s);
+      x.shadowBlur = 0;
+      continue;
+    }
     const e = p.reverse ? 1 - k : k;
     const ease = e * e;
     const px = p.x + p.vx * ease * 220 + Math.sin(p.seed + e * 6) * 14 * e;
@@ -139,6 +183,17 @@ function loop() {
   if (particles.length) requestAnimationFrame(loop); else running = false;
 }
 function scrollYDelta(p) { return scrollY - p.sy; }
+
+/** A burst of sparks (used by the time dial). */
+export function sparks(x, y, color, n = 8) {
+  if (!running) sizeDust();
+  const t = performance.now();
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, v = 0.3 + Math.random() * 0.9;
+    particles.push({ spark: true, x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 0.3, s: Math.random() < 0.3 ? 2.2 : 1.4, c: color, t0: t, life: 500 + Math.random() * 500, sy: scrollY, seed: 0 });
+  }
+  if (!running) { running = true; requestAnimationFrame(loop); }
+}
 
 const PALETTE = ['#5b4637', '#8a6a52', '#2b2522', '#b08d6e', '#3a3030', '#d6c2a8'];
 

@@ -1,5 +1,6 @@
 import { Engine, STONE_SHAPES } from './engine.js';
-import { sound, disintegrate, scramble } from './fx.js';
+import { Conduit } from './conduit.js';
+import { sound, disintegrate, scramble, sparks } from './fx.js';
 import { PROFILE, STONES, ABOUT, SKILLS, PROJECTS, EXPERIENCE, OPEN_SOURCE, TIMELINE } from './content.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -13,19 +14,20 @@ const lerp = (a, b, k) => a + (b - a) * k;
 
 /* ============================== BUILD THE PAGE ============================== */
 
-function chapterHead(stone, i, title, extraHint) {
+function chapterHead(stone, i, title, extraHint, noRelic = false) {
   return `
-  <header class="chapter-head">
+  <header class="chapter-head${noRelic ? ' no-relic' : ''}">
     <div class="ch-text">
       <p class="ch-kicker dust"><span class="ch-num">${ROMAN[i]}</span><span class="ch-line"></span><span>The ${stone.name} Stone</span></p>
       <h2 class="ch-title dust">${title}</h2>
       <p class="ch-lore dust">${esc(stone.lore)}</p>
+      <p class="ch-log dust"><span>Log ${String(i).padStart(2, '0')}</span>${esc(stone.log)}</p>
     </div>
-    <div class="relic-anchor" data-relic="${stone.id}" data-stone="${stone.id}">
+    ${noRelic ? '' : `<div class="relic-anchor" data-relic="${stone.id}" data-stone="${stone.id}">
       <span class="relic-hint">${esc(extraHint || stone.how)}</span>
       <span class="relic-ring"></span>
       <img class="relic-fallback" src="assets/img/stones/${stone.id}.png" alt="" />
-    </div>
+    </div>`}
   </header>`;
 }
 
@@ -109,7 +111,7 @@ function build() {
   // V · TIME — Chronicle / Open source + timeline
   html.push(`
   <section class="chapter" id="time" data-chapter="5" data-stone="time" data-name="Time · Chronicle">
-    ${chapterHead(S.time, 5, 'Chronicle')}
+    ${chapterHead(S.time, 5, 'Chronicle', '', true)}
     <h3 class="sub dust">Open source</h3>
     <div class="oss">
       ${OPEN_SOURCE.map(o => `
@@ -123,11 +125,13 @@ function build() {
     <div class="chrono">
       <div class="dial dust" id="dial" role="slider" tabindex="0" aria-label="Time dial" aria-valuemin="1" aria-valuemax="${TIMELINE.length}" aria-valuenow="1">
         ${dialSVG()}
-        <div class="dial-center"><span id="dialYear" class="mono"></span></div>
+        <div class="relic-anchor dial-relic" data-relic="time" data-stone="time"><img class="relic-fallback" src="assets/img/stones/time.png" alt="" /></div>
+        ${irisSVG()}
+        <span class="dial-year" id="dialYear"></span>
       </div>
       <div class="chrono-read glass dust" id="chronoRead" aria-live="polite"></div>
     </div>
-    <p class="mono dial-help dust">Drag the dial, or use the arrow keys.</p>
+    <p class="mono dial-help dust" id="dialHelp">Turn the outer ring to wind back the years. One full turn opens the reliquary.</p>
   </section>`);
 
   // VI · SOUL — Contact
@@ -155,6 +159,29 @@ function build() {
     </a>`).join('');
 }
 
+function irisSVG() {
+  const blades = [];
+  const N = 9;
+  for (let i = 0; i < N; i++) {
+    const a0 = (i / N) * 360;
+    blades.push(`<g class="blade" style="--a:${a0}deg"><path d="M0,0 L66,-4 A66,66 0 0,1 38,54 Q20,22 0,0Z"/><path class="blade-hi" d="M6,-1 L62,-4" /></g>`);
+  }
+  return `
+  <svg class="iris" viewBox="-60 -60 120 120" aria-hidden="true">
+    <defs>
+      <clipPath id="irisClip"><circle r="57"/></clipPath>
+      <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#e7c98a"/><stop offset=".35" stop-color="#9c7438"/><stop offset=".6" stop-color="#5b3f19"/><stop offset=".85" stop-color="#b48a46"/><stop offset="1" stop-color="#3d2a10"/>
+      </linearGradient>
+      <radialGradient id="brassRim"><stop offset=".85" stop-color="#2a1c0a"/><stop offset=".93" stop-color="#c9a35f"/><stop offset="1" stop-color="#3a2810"/></radialGradient>
+      <filter id="bladeShade" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1.2" stdDeviation="1.4" flood-color="#000" flood-opacity=".75"/></filter>
+    </defs>
+    <g clip-path="url(#irisClip)"><g class="blades" filter="url(#bladeShade)">${blades.join('')}</g></g>
+    <circle r="58.5" fill="none" stroke="url(#brassRim)" stroke-width="5"/>
+    ${Array.from({ length: 18 }, (_, i) => { const a = i * 20 * Math.PI / 180; return `<circle cx="${Math.cos(a) * 58.5}" cy="${Math.sin(a) * 58.5}" r=".9" fill="#f3dca3"/>`; }).join('')}
+  </svg>`;
+}
+
 function dialSVG() {
   const ticks = [];
   for (let i = 0; i < 72; i++) {
@@ -172,6 +199,12 @@ function dialSVG() {
       <radialGradient id="dialGlow"><stop offset="0" stop-color="#1fe07a" stop-opacity=".35"/><stop offset="1" stop-color="#1fe07a" stop-opacity="0"/></radialGradient>
     </defs>
     <circle cx="150" cy="150" r="150" fill="url(#dialGlow)"/>
+    <g class="sigils">
+      <circle cx="150" cy="150" r="172" class="sig s1"/>
+      <circle cx="150" cy="150" r="186" class="sig s2"/>
+      <g class="sig-glyphs">${Array.from({ length: 12 }, (_, i) => { const a = i * 30; return `<rect x="146" y="-28" width="8" height="8" transform="rotate(${a} 150 150) rotate(45 150 -24)" class="sig-g"/>`; }).join('')}</g>
+      <polygon class="sig-star" points="${Array.from({ length: 12 }, (_, i) => { const a = (i * 150) * Math.PI / 180; return `${150 + Math.cos(a) * 168},${150 + Math.sin(a) * 168}`; }).join(' ')}"/>
+    </g>
     <g class="dial-outer">
       <circle cx="150" cy="150" r="144" class="ring"/>
       <g class="ticks">${ticks.join('')}</g>
@@ -179,7 +212,11 @@ function dialSVG() {
     <g class="dial-rot" id="dialRot">
       <circle cx="150" cy="150" r="104" class="ring thin"/>
       <g class="marks">${marks}</g>
-      <text class="runes"><textPath href="#runePath">ANTE · HOC · NUNC · POST — ANTE · HOC · NUNC · POST — ANTE · HOC · NUNC ·</textPath></text>
+      <g class="runes">${Array.from({ length: 36 }, (_, i) => {
+        const a = i * 10, k = i % 4;
+        const g = k === 0 ? 'M-3,-3 L0,3 L3,-3' : k === 1 ? 'M0,-3.5 L0,3.5 M-2.5,-1 L2.5,-1' : k === 2 ? 'M-3,0 A3,3 0 1,1 3,0' : 'M-2.5,-3 L2.5,3 M2.5,-3 L-2.5,3';
+        return `<path d="${g}" transform="rotate(${a} 150 150) translate(150 62)"/>`;
+      }).join('')}</g>
       <polygon points="150,30 158,52 150,46 142,52" class="pointer"/>
       <g class="petals">${[0,1,2,3,4,5].map(i => `<ellipse cx="150" cy="104" rx="12" ry="40" transform="rotate(${i*60} 150 150)"/>`).join('')}</g>
     </g>
@@ -211,6 +248,56 @@ try {
   document.body.classList.add('gl-off');
 }
 
+let conduit = null;
+try {
+  conduit = new Conduit($('#conduitGL'), STONES.map(s => s.rgb));
+  document.body.classList.add('conduit-on');
+} catch (e) { console.warn('Conduit fallback', e); }
+
+/* ---- power surges: screen trauma, light, shockwave, sound ---- */
+const quake = { trauma: 0, floor: 0, t: 0 };
+const surgeFx = { v: 0, col: [1, 1, 1], wave: 1, waveC: [0, 0] };
+function addTrauma(x) { quake.trauma = Math.min(1.4, quake.trauma + x); }
+function center(el) {
+  const r = el.getBoundingClientRect();
+  return [r.left + r.width / 2, innerHeight - (r.top + r.height / 2)];
+}
+function surge(level, st, originEl) {
+  addTrauma(0.35 + level * 0.55);
+  surgeFx.v = Math.min(1.4, 0.7 + level * 0.6);
+  surgeFx.col = st.rgb;
+  surgeFx.wave = 0;
+  surgeFx.waveC = originEl ? center(originEl) : [innerWidth / 2, innerHeight / 2];
+  document.documentElement.style.setProperty('--surge', st.hex);
+  document.body.classList.remove('surging'); void document.body.offsetWidth;
+  document.body.classList.add('surging');
+  setTimeout(() => document.body.classList.remove('surging'), 900);
+  if (conduit) { conduit.flash = 1; conduit.flashCol = st.rgb; }
+  sound.surge(level);
+}
+async function megaSurge() {
+  const box = $('.conduit');
+  document.body.classList.add('letterboxed', 'mega-on');
+  sound.mega();
+  for (let i = 0; i < STONES.length; i++) {
+    surge(0.35 + i * 0.08, STONES[i], box);
+    await wait(260);
+  }
+  await wait(250);
+  addTrauma(1.4);
+  surgeFx.v = 2.2; surgeFx.col = [1, 0.92, 0.75]; surgeFx.wave = 0; surgeFx.waveC = center(box);
+  document.body.classList.add('whiteout');
+  $('#mega').classList.add('show');
+  if (conduit) conduit.ready = 1;
+  await wait(900);
+  document.body.classList.remove('whiteout');
+  await wait(2600);
+  $('#mega').classList.remove('show');
+  document.body.classList.remove('letterboxed', 'mega-on');
+  toast('All six stones are seated. The <b>Snap</b> is in the centre of the medallion.', 5200);
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
 const relic = {
   anchor: null, current: null, vis: 0, swapping: false,
   rot: [0, 0], vel: [0, 0], dragging: false,
@@ -231,22 +318,22 @@ function pickAnchor() {
   return best;
 }
 
+let irisOpen = 0;
 function relicVisible(key) {
   if (key === 'reality') return realityOn || claimed.has('reality');
+  if (key === 'time') return irisOpen > 0.03;
   return true;
 }
 
 function applyRelic(key) {
-  const s = engine.state;
   if (key === 'cube') {
-    if (claimed.has('space')) { s.type = 1; s.shape = STONE_SHAPES.space; s.gem = stoneById('space').rgb; }
-    else { s.type = 0; }
-  } else {
-    s.type = 1; s.shape = STONE_SHAPES[key]; s.gem = stoneById(key).rgb;
-  }
+    if (claimed.has('space')) engine.setStone('space', stoneById('space').rgb);
+    else engine.state.type = 0;
+  } else engine.setStone(key, stoneById(key).rgb);
 }
 
 let last = performance.now();
+const mainEl = document.querySelector('main');
 let mouse = [0.5, 0.5];
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
@@ -291,6 +378,9 @@ function frame(now) {
     fx.power = lerp(fx.power, fx.powerTarget, Math.min(1, dt * 6));
     s.reality = fx.reality; s.rewind = fx.rewind; s.power = fx.power;
     s.snap = fx.snap; s.crack = fx.crack;
+    surgeFx.v = Math.max(0, surgeFx.v - dt * 1.1);
+    surgeFx.wave = Math.min(1, surgeFx.wave + dt * 0.75);
+    s.surge = Math.min(1.5, surgeFx.v); s.surgeCol = surgeFx.col; s.wave = surgeFx.wave; s.waveC = surgeFx.waveC;
 
     // background tint follows the chapter
     const target = currentStone ? stoneById(currentStone).rgb : [0.24, 0.5, 1];
@@ -299,6 +389,16 @@ function frame(now) {
 
     engine.render();
   }
+  // camera shake: trauma squared, driven by smooth noise, decays like a real impact
+  quake.t += dt;
+  quake.trauma = Math.max(quake.floor, quake.trauma - dt * 0.85);
+  const amp = reduced ? 0 : quake.trauma * quake.trauma;
+  const nz = (o) => Math.sin(quake.t * 31 + o) * 0.6 + Math.sin(quake.t * 57 + o * 2.3) * 0.4;
+  const sx = amp * 22 * nz(1), sy = amp * 16 * nz(7), sr = amp * 1.2 * nz(13);
+  const tr = amp > 0.0005 ? `translate3d(${sx}px, ${sy}px, 0) rotate(${sr}deg)` : '';
+  mainEl.style.transform = tr;
+  glCanvas.style.transform = amp > 0.0005 ? `translate3d(${sx * 0.6}px, ${sy * 0.6}px, 0) scale(1.06)` : '';
+  if (conduit) { conduit.tiltT = [(mouse[0] - 0.5) * 0.35, (mouse[1] - 0.5) * 0.35]; conduit.step(dt); }
   requestAnimationFrame(frame);
 }
 
@@ -354,9 +454,9 @@ function refreshSockets() {
   $$('.relic-anchor').forEach(a => a.classList.toggle('owned', claimed.has(a.dataset.stone) && a.dataset.relic !== 'cube'));
 }
 
-function flyToSocket(id, fromEl) {
+function flyToSocket(id, fromEl, onArrive) {
   const sock = $(`.socket[data-stone="${id}"]`);
-  if (!sock || !fromEl) return;
+  if (!sock || !fromEl) { onArrive && onArrive(); return; }
   const a = fromEl.getBoundingClientRect(), b = sock.getBoundingClientRect();
   const img = document.createElement('img');
   img.src = `assets/img/stones/${id}.png`;
@@ -372,6 +472,7 @@ function flyToSocket(id, fromEl) {
   ], { duration: reduced ? 10 : 1100, easing: 'cubic-bezier(.6,0,.3,1)' }).onfinish = () => {
     img.remove();
     sock.classList.add('flash'); setTimeout(() => sock.classList.remove('flash'), 900);
+    onArrive && onArrive();
   };
 }
 
@@ -380,12 +481,18 @@ function claim(id, fromEl, quiet = false) {
   claimed.add(id);
   store.set([...claimed]);
   const st = stoneById(id);
-  flyToSocket(id, fromEl || $(`.relic-anchor[data-relic="${id}"]`));
-  setTimeout(refreshSockets, quiet ? 0 : 900);
+  const n = claimed.size;
+  flyToSocket(id, fromEl || $(`.relic-anchor[data-relic="${id}"]`), () => {
+    if (conduit) conduit.set(STONES.indexOf(st), true);
+    refreshSockets();
+    if (quiet) return;
+    surge(n / 6, st, $('.conduit'));
+    if (n === 6) setTimeout(megaSurge, 700);
+  });
   if (!quiet) {
     sound.chime(330 + STONES.indexOf(st) * 55);
-    const left = 6 - claimed.size;
-    toast(`<b style="color:${st.hex}">The ${st.name} Stone</b> is yours. ${left ? `${left} remain.` : 'All six. The snap is ready.'}`);
+    const left = 6 - n;
+    toast(`<b style="color:${st.hex}">The ${st.name} Stone</b> is yours. ${left ? `${left} remain.` : 'All six.'}`);
   }
   return true;
 }
@@ -466,8 +573,7 @@ function bindRelics() {
         const k = Math.min(1, (performance.now() - holdStart) / 2400);
         fx.powerTarget = k;
         a.style.setProperty('--hold', k);
-        document.body.style.setProperty('--shake', `${k * k * 5}px`);
-        document.body.classList.add('shaking');
+        quake.floor = k * 0.55;
         sound.tint(k);
         if (k >= 1) { endHold(true); return; }
         holdRAF = requestAnimationFrame(step);
@@ -477,7 +583,7 @@ function bindRelics() {
     function endHold(done) {
       cancelAnimationFrame(holdRAF);
       a.classList.remove('holding');
-      document.body.classList.remove('shaking');
+      quake.floor = 0;
       sound.tint(0);
       if (done === true) {
         shockwave(a, '#a24dff');
@@ -671,6 +777,12 @@ function timeDial() {
   function setAngle(a, delta) {
     angle = a;
     total += delta;
+    if (!claimed.has('time')) setIris(Math.min(1, Math.abs(total) / 360));
+    dial.style.setProperty('--conjure', Math.min(1, Math.abs(delta) / 4));
+    if (Math.abs(delta) > 0.6 && Math.random() < 0.7) {
+      const r = dial.getBoundingClientRect(), th = Math.random() * Math.PI * 2, rad = r.width * (0.35 + Math.random() * 0.2);
+      sparks(r.left + r.width / 2 + Math.cos(th) * rad, r.top + r.height / 2 + Math.sin(th) * rad, '#5dffa8', 6);
+    }
     rotG.style.transform = `rotate(${angle}deg)`;
     const i = ((Math.round(angle / (360 / N)) % N) + N) % N;
     show(i);
@@ -678,7 +790,8 @@ function timeDial() {
     clearTimeout(setAngle._t);
     setAngle._t = setTimeout(() => fx.rewindTarget = 0, 160);
     if (Math.abs(total) >= 360 && !claimed.has('time')) {
-      claim('time', $('.relic-anchor[data-relic="time"]'));
+      $('#dialHelp').textContent = 'The reliquary is open. The Time Stone is yours.';
+      setTimeout(() => claim('time', $('.relic-anchor[data-relic="time"]')), 900);
       shockwave(dial, '#1fe07a');
     }
   }
@@ -698,7 +811,7 @@ function timeDial() {
     setAngle(angle + d, d);
   });
   const end = () => {
-    last = null; dial.classList.remove('turning');
+    last = null; dial.classList.remove('turning'); dial.style.setProperty('--conjure', 0);
     const snapTo = Math.round(angle / (360 / N)) * (360 / N);
     const from = angle;
     tween(300, k => { angle = lerp(from, snapTo, k); rotG.style.transform = `rotate(${angle}deg)`; });
@@ -715,6 +828,12 @@ function timeDial() {
     tween(320, k => { const v = d * k; setAngle(from + v, v - prev); prev = v; });
   }
   show(0);
+}
+
+function setIris(k) {
+  irisOpen = k;
+  $$('.iris .blade').forEach(b => b.style.setProperty('--o', k));
+  const d = $('#dial'); if (d) d.classList.toggle('open', k >= 1);
 }
 
 /* ============================== REALITY ============================== */
@@ -788,21 +907,16 @@ function skipHunt() {
   const order = STONES.map(s => s.id).filter(id => !claimed.has(id));
   if (!order.length) { toast('You already hold all six.'); return; }
   order.forEach((id, i) => setTimeout(() => {
-    const a = $(`.relic-anchor[data-relic="${id}"]`);
-    claimed.add(id); store.set([...claimed]);
-    flyToSocket(id, $('#skipBtn'));
-    sound.chime(330 + i * 60);
-    refreshSockets();
+    claim(id, $('#skipBtn'));
     if (id === 'space' && relic.current === 'cube') applyRelic('cube');
-  }, i * 220));
-  setTimeout(() => toast('All six stones, gathered the easy way. The <b>Snap</b> is ready at the bottom of the screen.', 5200), order.length * 220 + 400);
+    if (id === 'time') setIris(1);
+  }, i * 750));
 }
 
 function enter(withSound) {
-  sound.init();
-  sound.set(withSound);
+  if (withSound) { sound.init(); sound.set(true); }
   $('#soundBtn').setAttribute('aria-pressed', String(withSound));
-  document.body.classList.remove('booting');
+  document.body.classList.remove('booting', 'letterboxed');
   $('#intro').classList.add('gone');
   setTimeout(() => $('#intro').remove(), 1600);
   if (!claimed.size) setTimeout(() => toast('Six stones are hidden here. The first is inside the cube. <b>Strike it.</b>', 6000), 1800);
@@ -812,6 +926,8 @@ function enter(withSound) {
 
 build();
 refreshSockets();
+if (conduit) { conduit.resize(); STONES.forEach((st, i) => { if (claimed.has(st.id)) { conduit.set(i, true); conduit.own[i] = 1; } }); if (claimed.size === 6) conduit.ready = 1; addEventListener('resize', () => conduit.resize()); }
+setIris(claimed.has('time') ? 1 : 0);
 resize();
 watchChapters();
 reveal();
@@ -825,7 +941,7 @@ if (claimed.has('space')) $('.hero-relic .relic-hint').textContent = 'The Space 
 
 $$('[data-enter]').forEach(b => b.addEventListener('click', () => enter(b.dataset.enter === 'sound')));
 $('#realityBtn').addEventListener('click', () => setReality(!realityOn));
-$('#soundBtn').addEventListener('click', () => { const on = !sound.enabled; sound.set(on); $('#soundBtn').setAttribute('aria-pressed', String(on)); });
+$('#soundBtn').addEventListener('click', () => { const on = !sound.enabled; sound.init(); sound.set(on); $('#soundBtn').setAttribute('aria-pressed', String(on)); });
 $('#snapBtn').addEventListener('click', doSnap);
 $('#rewindBtn').addEventListener('click', undoSnap);
 $('#skipBtn').addEventListener('click', skipHunt);

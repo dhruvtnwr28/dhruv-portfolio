@@ -32,6 +32,10 @@ uniform float uPower;      // 0..1
 uniform float uCrack;      // 0..1 (cube fracture glow)
 uniform float uBg;         // 1 = draw sky, 0 = transparent (asset renders)
 uniform float uQuality;    // 0..1
+uniform float uSurge;      // 0..1 power surge
+uniform vec3  uSurgeCol;
+uniform float uWave;       // shockwave progress
+uniform vec2  uWaveC;      // shockwave origin (px)
 
 #define PI 3.14159265
 #define TAU 6.2831853
@@ -123,45 +127,36 @@ vec3 sky(vec2 uv, float t){
 }
 
 vec3 env(vec3 d){
-  // cheap environment for reflections: a projection of the sky + soft studio lights
-  vec3 c = sky(d.xy / (1.2 + abs(d.z)) * 1.6, uTime) * 1.6;
-  c += vec3(1.) * pow(max(dot(d, normalize(vec3(.6,.8,.4))),0.), 40.) * .7;
-  c += uGem * pow(max(dot(d, normalize(vec3(-.7,.2,.5))),0.), 6.) * .4;
+  // studio-in-space environment: dark void, a cool key softbox, a warm rim, faint nebula tint
+  float up = d.y*.5 + .5;
+  vec3 c = mix(vec3(.004,.005,.012), uCol*.10 + vec3(.01,.012,.03), up);
+  c += uCol * .25 * pow(n2(d.xy*2.3 + d.z) , 3.);
+  c += vec3(1.)        * smoothstep(.93, .985, dot(d, normalize(vec3(.55,.75,.38)))) * 2.2;   // key softbox
+  c += vec3(.75,.85,1.) * smoothstep(.96, .995, dot(d, normalize(vec3(-.8,.35,.45)))) * 1.3;  // fill strip
+  c += vec3(1.,.8,.6)  * pow(max(dot(d, normalize(vec3(.1,-.4,-1.))),0.), 8.) * .5;          // warm back rim
   return c;
 }
 
 /* ---------- relics ---------- */
 float sdRoundBox(vec3 p, vec3 b, float r){ vec3 q = abs(p)-b+r; return length(max(q,0.)) + min(max(q.x,max(q.y,q.z)),0.) - r; }
 
-// Faceted stone: an n-fold brilliant-ish cut built from folded half-spaces.
-float sdStone(vec3 p){
-  float el = uShape.w;
-  p.y /= el;
-  float ang = atan(p.z, p.x);
-  float rad = length(p.xz);
-  float N = 8.;
-  float seg = TAU/N;
-  float a1 = mod(ang + seg*.5, seg) - seg*.5;
-  float a2 = mod(ang, seg) - seg*.5;
-  float q1 = rad*cos(a1);
-  float q2 = rad*cos(a2);
-
-  float d = p.y - uShape.x;                                   // table
-  float c = uShape.y;
-  d = max(d, dot(vec2(q1, p.y), vec2(sin(c), cos(c))) - .62);  // main crown facets
-  d = max(d, dot(vec2(q2, p.y), vec2(sin(c*1.25), cos(c*1.25))) - .66); // star facets
-  d = max(d, q1*.98 + abs(p.y)*.05 - .84);                      // girdle
-  float pv = uShape.z;
-  d = max(d, dot(vec2(q1, p.y), vec2(sin(pv), -cos(pv))) - .5); // pavilion mains
-  d = max(d, dot(vec2(q2, p.y), vec2(sin(pv*1.12), -cos(pv*1.12))) - .53);
-  return d * min(el, 1.);
+// Raw crystal: convex hull of 16 seeded planes, then chipped with fine noise.
+uniform vec4 uPl[24];
+float sdCrystal(vec3 p){
+  vec3 q = p / vec3(uShape.x, uShape.w, uShape.y);
+  float s = min(uShape.x, min(uShape.y, uShape.w));
+  float d = length(q) - .86;
+  for (int i = 0; i < 24; i++) d = max(d, dot(q, uPl[i].xyz) - uPl[i].w);
+  d *= s;
+  d += (n3(p*9. + uShape.z*7.) - .5) * .006;
+  return d;
 }
 
 mat3 relicRot(){
   float t = uTime;
-  float ay = t*.25 + uRot.x;
-  float ax = .3*sin(t*.31) + uRot.y + (uType > .5 ? .12 : .55);
-  float az = uType > .5 ? .12*sin(t*.2) : .2;
+  float ay = t*.22 + uRot.x;
+  float ax = .25*sin(t*.31) + uRot.y + (uType > .5 ? .1 : .55);
+  float az = uType > .5 ? .15*sin(t*.2) : .2;
   mat3 Ry = mat3(cos(ay),0.,sin(ay), 0.,1.,0., -sin(ay),0.,cos(ay));
   mat3 Rx = mat3(1.,0.,0., 0.,cos(ax),-sin(ax), 0.,sin(ax),cos(ax));
   mat3 Rz = mat3(cos(az),-sin(az),0., sin(az),cos(az),0., 0.,0.,1.);
@@ -169,15 +164,15 @@ mat3 relicRot(){
 }
 
 float map(vec3 p){
-  if (uType < .5) return sdRoundBox(p, vec3(.56), .035);
-  return sdStone(p);
+  if (uType < .5) return sdRoundBox(p, vec3(.56), .03);
+  return sdCrystal(p);
 }
 vec3 nrm(vec3 p){
-  vec2 e = vec2(.0015, 0.);
+  vec2 e = vec2(.0012, 0.);
   return normalize(vec3(map(p+e.xyy)-map(p-e.xyy), map(p+e.yxy)-map(p-e.yxy), map(p+e.yyx)-map(p-e.yyx)));
 }
 
-// plasma inside the cube
+// energy inside the cube: dense blue fire with bright filaments
 float plasma(vec3 p, float t){
   vec3 q = p*2.4;
   q.xy *= rot(t*.3 + p.z*1.5);
@@ -185,13 +180,13 @@ float plasma(vec3 p, float t){
   float f = fbm3(q + vec3(0., 0., t*.7));
   float ridge = 1. - abs(2.*fbm3(q*1.7 - vec3(t*.4, 0., 0.)) - 1.);
   float core = exp(-length(p)*3.4);
-  return f*f*1.2 + pow(ridge, 6.)*1.6 + core*2.2;
+  return f*f*.8 + pow(ridge, 8.)*2.2 + core*2.4;
 }
 
 vec4 relic(vec2 fc){
   vec2 p = (fc - uObj.xy) / uObj.z;
   float L = length(p);
-  if (L > 2.2 || uVis < .005) return vec4(0.);
+  if (L > 2.4 || uVis < .005) return vec4(0.);
 
   mat3 R = relicRot();
   // rotate the rays instead of the relic (row-vector multiply = inverse rotation)
@@ -201,92 +196,130 @@ vec4 relic(vec2 fc){
   float t = 0., minD = 9.;
   bool hit = false;
   vec3 pos;
-  for (int i = 0; i < 90; i++){
+  for (int i = 0; i < 96; i++){
     pos = ro + rd*t;
     float d = map(pos);
-    // snap: dissolve the relic into ash
     if (uSnap > .001){
       float ash = n3(pos*7. + uTime*.2);
       if (ash < uSnap*1.15 - .1) d = max(d, .02);
     }
     minD = min(minD, d);
-    if (d < .0008){ hit = true; break; }
-    t += d*.9;
+    if (d < .0007){ hit = true; break; }
+    t += d*.85;
     if (t > 6.) break;
   }
 
-  vec3 glowCol = uType < .5 ? vec3(.25, .65, 1.) : uGem;
-  float halo = exp(-minD*7.) * .55 + exp(-L*2.4)*.18;
+  vec3 glowCol = uType < .5 ? vec3(.25, .6, 1.) : uGem;
+  float halo = exp(-minD*10.) * .28 + exp(-L*2.4)*.14;
+  halo *= 1. + uSurge*2.5;
   vec3 col = glowCol * halo;
   float alpha = clamp(halo*1.1, 0., 1.);
 
   if (hit){
     vec3 n = nrm(pos);
     vec3 v = -rd;
-    float fres = .04 + .96*pow(1. - max(dot(n, v), 0.), 5.);
-    vec3 refl = env(reflect(rd, n));
-
-    // interior
-    vec3 rdi = refract(rd, n, 1./1.45);
-    if (dot(rdi,rdi) < .5) rdi = reflect(rd, n);
-    vec3 acc = vec3(0.);
-    float tr = 1.;
-    vec3 ip = pos - n*.003;
-    vec3 exitN = n;
-    float steps = uQuality > .5 ? 34. : 22.;
-    float st = 1.25/steps;
-    for (int i = 0; i < 34; i++){
-      if (float(i) >= steps) break;
-      ip += rdi*st;
-      float dd = map(ip);
-      if (dd > 0.){ exitN = nrm(ip); break; }
-      if (uType < .5){
-        float dens = plasma(ip, uTime);
-        vec3 c = mix(vec3(.02,.16,.9), vec3(.55,.9,1.), clamp(dens-1.1,0.,1.));
-        acc += c * dens * st * 1.5 * tr;
-        tr *= exp(-dens*st*.7);
-      } else {
-        float dens = .25 + pow(fbm3(ip*3.5 + vec3(0., uTime*.25, 0.)), 2.)*1.6;
-        float core = exp(-length(ip*vec3(1.,1./uShape.w,1.))*3.);
-        vec3 c = uGem*uGem * dens*.7 + mix(uGem, vec3(1.), .12) * core*1.8;
-        acc += c * st * 2.2 * tr;
-        tr *= exp(-dens*st*1.4);
-      }
-    }
+    float ndv = max(dot(n, v), 0.);
+    float fres = .045 + .955*pow(1. - ndv, 5.);
 
     if (uType < .5){
-      // glass cube: bright tessellated edges + inner plasma
+      /* ---- the cube: glass shell, nested frame, plasma core ---- */
+      vec3 refl = env(reflect(rd, n));
+      vec3 rdi = refract(rd, n, 1./1.48);
+      vec3 acc = vec3(0.); float tr = 1.;
+      vec3 ip = pos - n*.003;
+      float steps = uQuality > .5 ? 36. : 22.;
+      float st = 1.3/steps;
+      for (int i = 0; i < 36; i++){
+        if (float(i) >= steps) break;
+        ip += rdi*st;
+        if (map(ip) > 0.) break;
+        float dens = plasma(ip, uTime);
+        vec3 c = mix(vec3(.01,.12,.85), vec3(.45,.85,1.), clamp(dens-1.4,0.,1.));
+        acc += c * dens * st * 1.35 * tr;
+        tr *= exp(-dens*st*.55);
+      }
       vec3 ap = abs(pos)/.56;
       float mx = max(ap.x, max(ap.y, ap.z));
       float mid = ap.x + ap.y + ap.z - mx - min(ap.x, min(ap.y, ap.z));
-      float edge = smoothstep(.86, .99, mid);
-      // inner frame (tesseract's nested cube) seen through glass
+      float edge = smoothstep(.9, .995, mid);
       vec3 inner = abs(pos + rdi*.25)/.3;
       float im = max(inner.x, max(inner.y, inner.z));
-      float innerEdge = smoothstep(.12, .0, abs(im - 1.)) * .35;
-      col = acc*1.15 + refl*fres*1.3 + vec3(.55,.85,1.)*edge*1.6 + vec3(.3,.7,1.)*innerEdge;
-      col += vec3(.2,.5,1.) * (1.-tr) * .25;
-      // fracture lines
+      float innerEdge = smoothstep(.1, .0, abs(im - 1.)) * .3;
+      col = acc + refl*fres*1.4 + vec3(.6,.88,1.)*edge*1.2 + vec3(.3,.7,1.)*innerEdge + env(rdi)*tr*.4;
       if (uCrack > .001){
         vec2 cp = (abs(n.x) > .5 ? pos.yz : abs(n.y) > .5 ? pos.xz : pos.xy) * 6.;
         float cr = abs(fbm2(cp*1.3) - .5);
         col += vec3(.7,.95,1.) * smoothstep(.025, .0, cr) * uCrack * 3.;
       }
     } else {
-      // stone: facet fire from the exit facet + sharp sparkles
-      float facet = h31(floor(exitN*5.3 + 11.));
-      float fire = pow(abs(dot(rdi, exitN)), 3.);
-      vec3 body = acc * (.5 + facet*1.2) + uGem * fire * .6 * facet + uGem*uGem*.04;
-      vec3 L1 = normalize(vec3(.6,.8,.5)), L2 = normalize(vec3(-.8,.3,.6)), L3 = normalize(vec3(.1,-.6,.9));
+      /* ---- raw crystal: refraction, absorption, inner fire, fractures, dispersion ---- */
+      // frosted / polished patches
+      // which natural face did we hit? each face catches the light differently
+      vec3 qq = pos / vec3(uShape.x, uShape.w, uShape.y);
+      float best = -9., second = -9.; float fid = 0.;
+      for (int i = 0; i < 24; i++){
+        float dd = dot(qq, uPl[i].xyz) - uPl[i].w;
+        if (dd > best){ second = best; best = dd; fid = float(i); } else if (dd > second) second = dd;
+      }
+      float ridge = 1. - smoothstep(.0, .018, best - second);
+      float faceRand = h11(fid*7.31 + uShape.z);
+      float frost = 0.;
+      vec3 nr = n;
+      vec3 refl = env(reflect(rd, nr)) * (.55 + faceRand*.9) * (1. - frost*.6);
+
+      vec3 rdi = refract(rd, nr, 1./1.56);
+      vec3 ip = pos - n*.002;
+      vec3 acc = vec3(0.);
+      float path = 0.;
+      float dither = h21(p*731. + fract(uTime));
+      vec3 exitN = n;
+      float steps = uQuality > .5 ? 30. : 18.;
+      float st = 1.4/steps;
+      vec3 fr1 = normalize(vec3(.6, .5, -.3) + uShape.z), fr2 = normalize(vec3(-.3, .8, .5) - uShape.z*.5);
+      for (int i = 0; i < 30; i++){
+        if (float(i) >= steps) break;
+        ip += rdi*st*(i == 0 ? dither : 1.);
+        float dd = map(ip);
+        if (dd > 0.){ exitN = nrm(ip); break; }
+        path += st;
+        float rr = length(ip / vec3(uShape.x, uShape.w, uShape.y));
+        float core = exp(-rr*rr*9.);
+        float cloud = pow(fbm3(ip*2.6 + vec3(0., uTime*.18, 0.)), 4.) * 2.;
+        cloud += pow(1. - abs(2.*fbm3(ip*4.5 - vec3(uTime*.1, 0., 0.)) - 1.), 12.) * 2.5;
+        // planar fractures catch the light
+        float f1 = smoothstep(.05, .0, abs(dot(ip, fr1) - .08)) * smoothstep(.45, .6, n3(ip*4.));
+        float f2 = smoothstep(.05, .0, abs(dot(ip, fr2) + .12)) * smoothstep(.5, .65, n3(ip*5.+4.));
+        acc += (uGem*uGem * (core*3.4 + cloud*.7) + mix(uGem, vec3(1.), .3) * core*core*2.2 + mix(uGem, vec3(1.), .6) * (f1 + f2) * .9) * st;
+      }
+      // exit: refract out (or totally reflect, which gives the deep flashes)
+      vec3 absorb = exp(-(1. - uGem) * path * 4.6) * (.75 + .5*faceRand);
+      vec3 rdo = refract(rdi, -exitN, 1.56);
+      vec3 trans;
+      if (dot(rdo, rdo) < .5){
+        vec3 ri = reflect(rdi, -exitN);
+        trans = env(ri) * .6 + uGem * .35;
+      } else {
+        // dispersion: three slightly different exit angles
+        vec3 rdR = refract(rdi, -exitN, 1.53), rdB = refract(rdi, -exitN, 1.60);
+        if (dot(rdR,rdR) < .5) rdR = rdo; if (dot(rdB,rdB) < .5) rdB = rdo;
+        trans = vec3(env(rdR).r, env(rdo).g, env(rdB).b);
+      }
+      vec3 body = trans * uGem * absorb * .8 + acc * mix(vec3(1.), absorb, .35);
+      // specular glints from the softboxes
       vec3 rr = reflect(rd, n);
-      float spark = pow(max(dot(rr, L1),0.), 90.)*2.5 + pow(max(dot(rr, L2),0.), 120.)*1.8 + pow(max(dot(rr, L3),0.), 60.);
-      float facetFlash = pow(h31(floor(n*7.1)+floor(uTime*.6)), 18.) * .9;
-      col = body + refl*mix(vec3(1.), uGem, .45)*fres*.8 + vec3(1.)*spark + mix(uGem, vec3(1.), .5)*facetFlash*.6;
-      // subtle chromatic dispersion around edges
-      col += vec3(.15,.0,.25) * pow(fres, .6) * .3;
+      float spec = pow(max(dot(rr, normalize(vec3(.55,.75,.38))),0.), 90.) * 5. + pow(max(dot(rr, normalize(vec3(-.8,.35,.45))),0.), 160.) * 3.
+                 + pow(max(dot(rr, normalize(vec3(.2,-.3,.95))),0.), 60.) * 1.2;
+      // bright crisp edges where faces meet
+      float edgeL = 1. - smoothstep(.0, .012, abs(best - (-0.0)) );
+      vec3 Lk = normalize(vec3(.55,.75,.38));
+      float sheen = pow(max(dot(rr, Lk), 0.), 10.) * faceRand * faceRand;
+      float edgeVar = smoothstep(.35, .75, n3(pos*3.5 + uShape.z));
+      col = body + refl * (fres * 1.2 + .03) + vec3(1.) * spec + mix(uGem, vec3(1.), .3) * sheen * .7
+          + mix(uGem, vec3(1.), .5) * ridge * edgeVar * (.06 + .8*pow(max(dot(n, Lk), 0.), 3.));
+      col += uGem * fres * .25;  // the stone's own light leaking at grazing angles
+      col *= 1. + uSurge * 1.8;
     }
 
-    // ember rim when dissolving
     if (uSnap > .001){
       float ash = n3(pos*7. + uTime*.2);
       float rim = smoothstep(.08, .0, abs(ash - (uSnap*1.15 - .1)));
@@ -300,35 +333,83 @@ vec4 relic(vec2 fc){
 /* ---------- compose ---------- */
 void main(){
   vec2 fc = gl_FragCoord.xy;
-  vec2 uv = (fc - .5*uRes) / uRes.y;
+
+  // surge shockwave: a ring that bends space as it travels
+  vec2 sfc = fc;
+  if (uWave > .001 && uWave < .999){
+    vec2 dv = fc - uWaveC;
+    float dist = length(dv);
+    float radius = uWave * length(uRes) * 1.1;
+    float ring = exp(-pow((dist - radius) / (uRes.y*.05), 2.));
+    sfc -= normalize(dv + .001) * ring * uRes.y * .035 * (1. - uWave);
+  }
+  vec2 uv = (sfc - .5*uRes) / uRes.y;
+
   vec3 col = vec3(0.);
   float alpha = uBg;
   if (uBg > .5){
     col = sky(uv * 1.15, uTime);
+    // the light of a surge floods the void
+    col += uSurgeCol * uSurge * (.25 + .6*fbm2(uv*3. + uTime));
     float vig = smoothstep(1.35, .2, length(uv*vec2(.9,1.1)));
-    col *= .35 + .65*vig;
+    col *= .3 + .7*vig;
+    if (uWave > .001 && uWave < .999){
+      float dist = length(fc - uWaveC), radius = uWave * length(uRes) * 1.1;
+      col += uSurgeCol * exp(-pow((dist - radius) / (uRes.y*.012), 2.)) * (1. - uWave) * 1.5;
+    }
   }
   vec4 r = relic(fc);
-  if (uBg > .5) col = mix(col, r.rgb, step(.999, r.a)) + (r.a < .999 ? r.rgb : vec3(0.));
-  else { alpha = r.a; col = r.rgb / max(r.a, .001); }
+  if (uBg > .5){
+    col = mix(col, r.rgb, step(.999, r.a)) + (r.a < .999 ? r.rgb : vec3(0.));
+    // anamorphic lens streak + soft bloom around the relic
+    if (uVis > .01){
+      vec2 d = fc - uObj.xy;
+      vec3 gc = uType < .5 ? vec3(.3, .6, 1.) : uGem;
+      float streak = exp(-abs(d.y) / (uObj.z*.035)) * exp(-abs(d.x) / (uObj.z*2.6));
+      float bloom = exp(-length(d) / (uObj.z*.9));
+      col += gc * (streak*.28 + bloom*.12) * uVis * (1. + uSurge*3.);
+      // a faint ghost on the far side of the frame
+      vec2 g = .5*uRes - d*.6;
+      col += gc * exp(-length(fc - (.5*uRes + (.5*uRes - uObj.xy)*.7)) / (uObj.z*.25)) * .05 * uVis;
+    }
+  } else { alpha = r.a; col = r.rgb / max(r.a, .001); }
 
-  // filmic tonemap + grain
-  col = col / (1. + col*.85);
-  col = pow(col, vec3(.92));
-  col += (h21(fc + fract(uTime)*91.) - .5) * .025 * uBg;
+  // filmic tonemap, slight warm/cool grade, grain
+  col = col / (1. + col*.8);
+  col = pow(col, vec3(.93, .95, .98));
+  col += (h21(fc + fract(uTime)*91.) - .5) * .03 * uBg;
   gl_FragColor = vec4(col, alpha);
 }
 `;
 
+/* Raw-crystal proportions: [width, depth, seed, height]. */
 export const STONE_SHAPES = {
-  // table height, crown angle, pavilion angle, vertical stretch
-  space:   [0.30, 0.78, 0.82, 1.00],
-  mind:    [0.26, 0.62, 0.70, 1.55],
-  reality: [0.34, 0.86, 0.90, 0.85],
-  power:   [0.30, 0.72, 0.80, 1.10],
-  time:    [0.36, 0.95, 0.95, 0.75],
-  soul:    [0.30, 0.80, 0.86, 1.00],
+  space:   [0.92, 0.86, 1.7, 1.02],
+  mind:    [0.84, 0.80, 4.3, 1.18],
+  reality: [0.96, 0.84, 2.9, 1.06],
+  power:   [1.00, 0.88, 6.1, 0.92],
+  time:    [0.94, 0.90, 3.6, 0.98],
+  soul:    [0.88, 0.84, 5.2, 1.12],
 };
+
+/** Sixteen cutting planes for a raw crystal, spread over the sphere and jittered by a seed. */
+export function crystalPlanes(seed, n = 24) {
+  let a = Math.sin(seed * 91.7) * 43758.5453;
+  const rnd = () => { a = Math.sin(a * 12.9898 + 78.233) * 43758.5453; return a - Math.floor(a); };
+  const out = new Float32Array(n * 4);
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < n; i++) {
+    const y = 1 - (i + 0.5) / n * 2;
+    const r = Math.sqrt(1 - y * y);
+    const th = golden * i + rnd() * 0.9;
+    let v = [Math.cos(th) * r + (rnd() - .5) * .35, y + (rnd() - .5) * .35, Math.sin(th) * r + (rnd() - .5) * .35];
+    const L = Math.hypot(...v); v = v.map(x => x / L);
+    out.set([v[0], v[1], v[2], 0.54 + rnd() * 0.2], i * 4);
+  }
+  return out;
+}
+const PLANES = {};
+export function planesFor(id) { return PLANES[id] || (PLANES[id] = crystalPlanes((STONE_SHAPES[id] || STONE_SHAPES.space)[2])); }
 
 export class Engine {
   constructor(canvas, opts = {}) {
@@ -348,14 +429,22 @@ export class Engine {
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     this.u = {};
-    ['uRes','uTime','uMouse','uCol','uObj','uType','uShape','uGem','uRot','uVis','uReality','uRewind','uSnap','uPower','uCrack','uBg','uQuality']
+    ['uRes','uTime','uMouse','uCol','uObj','uType','uShape','uGem','uRot','uVis','uReality','uRewind','uSnap','uPower','uCrack','uBg','uQuality','uSurge','uSurgeCol','uWave','uWaveC','uPl']
       .forEach(n => this.u[n] = gl.getUniformLocation(prog, n));
 
     this.state = {
       time: 0, mouse: [0.5, 0.5], col: [0.2, 0.45, 1.0], obj: [0, 0, 100], type: 0,
-      shape: STONE_SHAPES.space, gem: [0.2, 0.5, 1.0], rot: [0, 0], vis: 1,
+      shape: STONE_SHAPES.space, planes: planesFor('space'), gem: [0.2, 0.5, 1.0], rot: [0, 0], vis: 1,
       reality: 0, rewind: 0, snap: 0, power: 0, crack: 0, quality: 1,
+      surge: 0, surgeCol: [1, 1, 1], wave: 0, waveC: [0, 0],
     };
+  }
+
+  setStone(id, rgb) {
+    this.state.type = 1;
+    this.state.shape = STONE_SHAPES[id];
+    this.state.planes = planesFor(id);
+    this.state.gem = rgb;
   }
 
   _program(vs, fs) {
@@ -382,14 +471,15 @@ export class Engine {
   }
 
   render() {
-    const gl = this.gl, u = this.u, s = this.state, c = this.canvas;
+    const gl = this.gl, u = this.u, s = this.state, c = this.canvas, k = this.scale;
     gl.uniform2f(u.uRes, c.width, c.height);
     gl.uniform1f(u.uTime, s.time);
     gl.uniform2f(u.uMouse, s.mouse[0], s.mouse[1]);
     gl.uniform3fv(u.uCol, s.col);
-    gl.uniform3f(u.uObj, s.obj[0] * this.scale, s.obj[1] * this.scale, s.obj[2] * this.scale);
+    gl.uniform3f(u.uObj, s.obj[0] * k, s.obj[1] * k, s.obj[2] * k);
     gl.uniform1f(u.uType, s.type);
     gl.uniform4fv(u.uShape, s.shape);
+    gl.uniform4fv(u.uPl, s.planes);
     gl.uniform3fv(u.uGem, s.gem);
     gl.uniform2f(u.uRot, s.rot[0], s.rot[1]);
     gl.uniform1f(u.uVis, s.vis);
@@ -400,6 +490,10 @@ export class Engine {
     gl.uniform1f(u.uCrack, s.crack);
     gl.uniform1f(u.uBg, this.bg ? 1 : 0);
     gl.uniform1f(u.uQuality, s.quality);
+    gl.uniform1f(u.uSurge, s.surge);
+    gl.uniform3fv(u.uSurgeCol, s.surgeCol);
+    gl.uniform1f(u.uWave, s.wave);
+    gl.uniform2f(u.uWaveC, s.waveC[0] * k, s.waveC[1] * k);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 }

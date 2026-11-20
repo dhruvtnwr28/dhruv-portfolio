@@ -10,22 +10,22 @@ export const PROFILE = {
 
 /* The six stones. Each one guards a chapter of the site and is claimed in its own way. */
 export const STONES = [
-  { id: 'space',   name: 'Space',   chapter: 'Origin',      hex: '#3d8bff', rgb: [0.24, 0.55, 1.00],
+  { id: 'space', log: 'The first stone was never lost. It was sealed inside the cube, waiting for someone to strike hard enough.',   name: 'Space',   chapter: 'Origin',      hex: '#3d8bff', rgb: [0.24, 0.55, 1.00],
     lore: 'It bends distance until every place is next door.',
     how: 'Shatter the cube in the opening scene.' },
-  { id: 'mind',    name: 'Mind',    chapter: 'Arsenal',     hex: '#ffcc33', rgb: [1.00, 0.78, 0.18],
+  { id: 'mind', log: 'Ideas that connect become something more. Link three and the stone surfaces.',    name: 'Mind',    chapter: 'Arsenal',     hex: '#ffcc33', rgb: [1.00, 0.78, 0.18],
     lore: 'It does not give you ideas. It shows you the ones already there.',
     how: 'Wake three linked skills in the constellation.' },
-  { id: 'reality', name: 'Reality', chapter: 'Creations',   hex: '#ff2d3c', rgb: [1.00, 0.12, 0.16],
+  { id: 'reality', log: 'Here the stone hides in plain sight. Change what you are willing to see.', name: 'Reality', chapter: 'Creations',   hex: '#ff2d3c', rgb: [1.00, 0.12, 0.16],
     lore: 'What you see is a choice. Choose again.',
     how: 'It only exists in the other reality. Flip it first.' },
-  { id: 'power',   name: 'Power',   chapter: 'Experience',  hex: '#a24dff', rgb: [0.62, 0.25, 1.00],
+  { id: 'power', log: 'It burns anyone who lets go too early. Hold on.',   name: 'Power',   chapter: 'Experience',  hex: '#a24dff', rgb: [0.62, 0.25, 1.00],
     lore: 'Raw output. It does not care how you feel about it.',
     how: 'Grip it. Hold until it stops resisting.' },
-  { id: 'time',    name: 'Time',    chapter: 'Chronicle',   hex: '#1fe07a', rgb: [0.10, 0.92, 0.45],
+  { id: 'time', log: 'Sealed in a brass reliquary. It opens only for someone who turns back the years.',    name: 'Time',    chapter: 'Chronicle',   hex: '#1fe07a', rgb: [0.10, 0.92, 0.45],
     lore: 'Every commit is a moment you can return to.',
     how: 'Turn the dial through one full revolution.' },
-  { id: 'soul',    name: 'Soul',    chapter: 'Contact',     hex: '#ff8a1e', rgb: [1.00, 0.50, 0.10],
+  { id: 'soul', log: 'The last one weighs everything you carry.',    name: 'Soul',    chapter: 'Contact',     hex: '#ff8a1e', rgb: [1.00, 0.50, 0.10],
     lore: 'It is never found. It is exchanged.',
     how: 'It answers only to one who carries the other five.' },
 ];
