@@ -131,7 +131,7 @@ vec3 env(vec3 d){
   float up = d.y*.5 + .5;
   vec3 c = mix(vec3(.004,.005,.012), uCol*.10 + vec3(.01,.012,.03), up);
   c += uCol * .25 * pow(n2(d.xy*2.3 + d.z) , 3.);
-  c += vec3(1.)        * smoothstep(.93, .985, dot(d, normalize(vec3(.55,.75,.38)))) * 2.2;   // key softbox
+  c += vec3(1.,.97,.92) * smoothstep(.965, .995, dot(d, normalize(vec3(.55,.75,.38)))) * 1.8;   // key softbox
   c += vec3(.75,.85,1.) * smoothstep(.96, .995, dot(d, normalize(vec3(-.8,.35,.45)))) * 1.3;  // fill strip
   c += vec3(1.,.8,.6)  * pow(max(dot(d, normalize(vec3(.1,-.4,-1.))),0.), 8.) * .5;          // warm back rim
   return c;

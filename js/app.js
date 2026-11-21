@@ -1,5 +1,6 @@
 import { Engine, STONE_SHAPES } from './engine.js';
 import { Conduit } from './conduit.js';
+import { Reliquary } from './reliquary.js';
 import { sound, disintegrate, scramble, sparks } from './fx.js';
 import { PROFILE, STONES, ABOUT, SKILLS, PROJECTS, EXPERIENCE, OPEN_SOURCE, TIMELINE } from './content.js';
 
@@ -127,11 +128,13 @@ function build() {
         ${dialSVG()}
         <div class="relic-anchor dial-relic" data-relic="time" data-stone="time"><img class="relic-fallback" src="assets/img/stones/time.png" alt="" /></div>
         ${irisSVG()}
+        <canvas class="dial-rel" id="dialRel" aria-hidden="true"></canvas>
         <span class="dial-year" id="dialYear"></span>
       </div>
       <div class="chrono-read glass dust" id="chronoRead" aria-live="polite"></div>
     </div>
-    <p class="mono dial-help dust" id="dialHelp">Turn the outer ring to wind back the years. One full turn opens the reliquary.</p>
+    <p class="mono dial-help dust" id="dialHelp">Turn the outer ring to wind back the years. One full turn wakes the reliquary.</p>
+    <button class="btn btn-ghost replay-time dust" id="replayTime" hidden>Watch the reliquary open again</button>
   </section>`);
 
   // VI · SOUL — Contact
@@ -334,6 +337,7 @@ function applyRelic(key) {
 
 let last = performance.now();
 const mainEl = document.querySelector('main');
+const cam = { zoom: 1, origin: '50% 50%' };
 let mouse = [0.5, 0.5];
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
@@ -395,8 +399,11 @@ function frame(now) {
   const amp = reduced ? 0 : quake.trauma * quake.trauma;
   const nz = (o) => Math.sin(quake.t * 31 + o) * 0.6 + Math.sin(quake.t * 57 + o * 2.3) * 0.4;
   const sx = amp * 22 * nz(1), sy = amp * 16 * nz(7), sr = amp * 1.2 * nz(13);
-  const tr = amp > 0.0005 ? `translate3d(${sx}px, ${sy}px, 0) rotate(${sr}deg)` : '';
+  const zoomed = Math.abs(cam.zoom - 1) > 0.001;
+  const tr = (amp > 0.0005 ? `translate3d(${sx}px, ${sy}px, 0) rotate(${sr}deg)` : '') + (zoomed ? ` scale(${cam.zoom})` : '');
   mainEl.style.transform = tr;
+  mainEl.style.transformOrigin = zoomed ? cam.origin : '';
+  if (dialRel && dialRelVisible()) { dialRel.state.time += dt; dialRel.render(); }
   glCanvas.style.transform = amp > 0.0005 ? `translate3d(${sx * 0.6}px, ${sy * 0.6}px, 0) scale(1.06)` : '';
   if (conduit) { conduit.tiltT = [(mouse[0] - 0.5) * 0.35, (mouse[1] - 0.5) * 0.35]; conduit.step(dt); }
   requestAnimationFrame(frame);
@@ -777,7 +784,7 @@ function timeDial() {
   function setAngle(a, delta) {
     angle = a;
     total += delta;
-    if (!claimed.has('time')) setIris(Math.min(1, Math.abs(total) / 360));
+    if (!claimed.has('time') && !cineRunning) { setCharge(Math.min(1, Math.abs(total) / 360)); setIris(Math.min(0.08, Math.abs(total) / 360 * 0.08)); }
     dial.style.setProperty('--conjure', Math.min(1, Math.abs(delta) / 4));
     if (Math.abs(delta) > 0.6 && Math.random() < 0.7) {
       const r = dial.getBoundingClientRect(), th = Math.random() * Math.PI * 2, rad = r.width * (0.35 + Math.random() * 0.2);
@@ -789,10 +796,11 @@ function timeDial() {
     fx.rewindTarget = Math.min(1, Math.abs(delta) / 6);
     clearTimeout(setAngle._t);
     setAngle._t = setTimeout(() => fx.rewindTarget = 0, 160);
-    if (Math.abs(total) >= 360 && !claimed.has('time')) {
-      $('#dialHelp').textContent = 'The reliquary is open. The Time Stone is yours.';
-      setTimeout(() => claim('time', $('.relic-anchor[data-relic="time"]')), 900);
+    if (Math.abs(total) >= 360 && !claimed.has('time') && !cineRunning) {
+      $('#dialHelp').textContent = 'It is waking.';
+      last = null; dial.classList.remove('turning');
       shockwave(dial, '#1fe07a');
+      setTimeout(() => timeCinematic(), 350);
     }
   }
   const center = () => { const r = dial.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
@@ -830,10 +838,115 @@ function timeDial() {
   show(0);
 }
 
+let dialRel = null;
+function dialRelVisible() {
+  const c = dialRel.canvas.getBoundingClientRect();
+  return c.bottom > 0 && c.top < innerHeight;
+}
 function setIris(k) {
   irisOpen = k;
   $$('.iris .blade').forEach(b => b.style.setProperty('--o', k));
+  if (dialRel) dialRel.state.open = k;
   const d = $('#dial'); if (d) d.classList.toggle('open', k >= 1);
+}
+function setCharge(k) { if (dialRel) dialRel.state.charge = k; }
+
+/* ============================== TIME: the reliquary cinematic ============================== */
+
+let cineRunning = false;
+const CINE_STEP = +(new URLSearchParams(location.search).get('cinestep') || 0); // test hook: fixed seconds per frame
+async function timeCinematic({ replay = false } = {}) {
+  if (cineRunning) return;
+  cineRunning = true;
+  const dial = $('#dial');
+  const st = stoneById('time');
+
+  // 1 · camera pushes in on the reliquary
+  const dr = dial.getBoundingClientRect(), mr = mainEl.getBoundingClientRect();
+  cam.origin = `${dr.left + dr.width / 2 - mr.left}px ${dr.top + dr.height / 2 - mr.top}px`;
+  document.body.classList.add('letterboxed', 'cine-on');
+  sound.swell();
+  tween(1300, k => { cam.zoom = 1 + k * 1.8; });
+
+  // 2 · the cinematic stage
+  const el = document.createElement('div');
+  el.className = 'cine';
+  el.innerHTML = `
+    <canvas class="cine-stone"></canvas><canvas class="cine-rel"></canvas>
+    <div class="cine-cap"><p class="cine-k">V · The Time Stone</p><p class="cine-l">${esc(st.lore)}</p></div>
+    <button class="cine-skip mono">Skip ›</button>`;
+  document.body.appendChild(el);
+  let stone = null, rel = null;
+  try {
+    stone = new Engine(el.querySelector('.cine-stone'), { background: false, scale: touch ? 0.6 : 0.8 });
+    rel = new Reliquary(el.querySelector('.cine-rel'), { atmos: true });
+  } catch (e) {
+    console.warn('cinematic unavailable', e);
+  }
+  const size = () => {
+    if (stone) stone.resize(innerWidth, innerHeight);
+    if (rel) rel.resize(touch ? 0.5 : 0.62);
+  };
+  size(); addEventListener('resize', size);
+  if (stone) { stone.setStone('time', st.rgb); Object.assign(stone.state, { vis: 0, quality: 1, time: 1.5 }); }
+  requestAnimationFrame(() => el.classList.add('in'));
+
+  const T = reduced ? 3.2 : 7.2;
+  const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const seg = (t, a, b) => Math.min(1, Math.max(0, (t - a) / (b - a)));
+  let skip = false;
+  const onSkip = () => { skip = true; };
+  el.querySelector('.cine-skip').addEventListener('click', onSkip);
+  addEventListener('keydown', function esc_(e) { if (e.key === 'Escape') { onSkip(); removeEventListener('keydown', esc_); } });
+
+  const t0 = performance.now();
+  let lastClick = -1, chimed = false, burst = false;
+  await new Promise(done => {
+    const step = () => {
+      let t = CINE_STEP ? (step.n = (step.n || 0) + 1) * CINE_STEP : (performance.now() - t0) / 1000 * (7.2 / T);
+      window.__cineT = t;
+      if (skip && t < 6.2) t = 6.2;
+      const charge = ease(seg(t, 0.4, 2.0));
+      const open = ease(seg(t, 2.1, 4.4));
+      const flare = seg(t, 4.2, 4.6) * (1 - seg(t, 4.6, 6.0) * 0.6) * (1 - seg(t, 6.4, 7.2));
+      const fadeOut = seg(t, 6.3, 7.2);
+      const R = 0.27 + 0.07 * ease(seg(t, 0, 6.3));                    // slow dolly in
+      if (rel) {
+        Object.assign(rel.state, { time: t + 10, open, charge, flare: flare * 1.2, r: (touch ? 1.25 : 1) * R, rot: -0.25 + t * 0.05, cx: 0.5, cy: 0.5 });
+        rel.render();
+      }
+      if (stone) {
+        const minD = Math.min(innerWidth, innerHeight);
+        Object.assign(stone.state, { time: 1.5 + t * 0.6, obj: [innerWidth / 2, innerHeight / 2, minD * (touch ? 1.25 : 1) * R * 1.3], vis: Math.min(1, open * 1.6), surge: flare * 1.1 });
+        stone.render();
+      }
+      // mechanism: one click per blade as the iris opens
+      const ci = Math.floor(open * 9);
+      if (ci !== lastClick && open > 0 && open < 1) { lastClick = ci; sound.click(); }
+      if (charge > 0 && t < 2.1 && Math.random() < 0.15) sound.tick();
+      if (!burst && t >= 4.2) { burst = true; addTrauma(0.55); sound.surge(0.5); }
+      if (!chimed && t >= 4.5) { chimed = true; sound.chime(392); el.classList.add('cap'); }
+      el.style.opacity = String(1 - fadeOut);
+      if (t >= 6.3 && cam.zoom > 1 && !step.zoomOut) { step.zoomOut = true; const z = cam.zoom; tween(900, k => cam.zoom = z + (1 - z) * k); }
+      if (t >= 7.2) return done();
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+
+  removeEventListener('resize', size);
+  if (stone) stone.gl.getExtension('WEBGL_lose_context')?.loseContext();
+  if (rel) rel.destroy();
+  el.remove();
+  cam.zoom = 1;
+  document.body.classList.remove('letterboxed', 'cine-on');
+  setIris(1); setCharge(1);
+  $('#replayTime').hidden = false;
+  cineRunning = false;
+  if (!replay && !claimed.has('time')) {
+    $('#dialHelp').textContent = 'The reliquary is open. The Time Stone is yours.';
+    claim('time', $('.relic-anchor[data-relic="time"]'));
+  }
 }
 
 /* ============================== REALITY ============================== */
@@ -909,7 +1022,7 @@ function skipHunt() {
   order.forEach((id, i) => setTimeout(() => {
     claim(id, $('#skipBtn'));
     if (id === 'space' && relic.current === 'cube') applyRelic('cube');
-    if (id === 'time') setIris(1);
+    if (id === 'time') { setIris(1); setCharge(1); $('#replayTime').hidden = false; }
   }, i * 750));
 }
 
@@ -927,7 +1040,17 @@ function enter(withSound) {
 build();
 refreshSockets();
 if (conduit) { conduit.resize(); STONES.forEach((st, i) => { if (claimed.has(st.id)) { conduit.set(i, true); conduit.own[i] = 1; } }); if (claimed.size === 6) conduit.ready = 1; addEventListener('resize', () => conduit.resize()); }
+try {
+  dialRel = new Reliquary($('#dialRel'), { atmos: false });
+  dialRel.resize(Math.min(devicePixelRatio || 1, 2));
+  Object.assign(dialRel.state, { r: 0.5 / 1.05, rot: 0.3 });
+  document.body.classList.add('rel-on');
+  addEventListener('resize', () => dialRel.resize());
+} catch (e) { console.warn('reliquary fallback', e); }
 setIris(claimed.has('time') ? 1 : 0);
+setCharge(claimed.has('time') ? 1 : 0);
+if (claimed.has('time')) $('#replayTime').hidden = false;
+$('#replayTime').addEventListener('click', () => timeCinematic({ replay: true }));
 resize();
 watchChapters();
 reveal();

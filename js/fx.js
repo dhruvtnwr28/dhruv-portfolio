@@ -94,6 +94,30 @@ export const sound = {
     o.frequency.value = 41; og.gain.setValueAtTime(0.0001, t + 0.15); og.gain.exponentialRampToValueAtTime(0.35, t + 0.3); og.gain.exponentialRampToValueAtTime(0.0001, t + 3.5);
     o.connect(og).connect(this.master); o.start(t + 0.15); o.stop(t + 3.6);
   },
+  click() {
+    if (!this.enabled) return;
+    const c = this.ctx, t = c.currentTime;
+    const n = this._noise(0.05), f = c.createBiquadFilter(), g = c.createGain();
+    f.type = 'bandpass'; f.frequency.value = 3200; f.Q.value = 6;
+    g.gain.setValueAtTime(0.35, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+    n.connect(f).connect(g).connect(this.master); n.start(t);
+    const o = c.createOscillator(), og = c.createGain();
+    o.frequency.value = 1900 + Math.random() * 300;
+    og.gain.setValueAtTime(0.05, t); og.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+    o.connect(og).connect(this.master); o.start(t); o.stop(t + 0.13);
+  },
+  swell() {
+    if (!this.enabled) return;
+    const c = this.ctx, t = c.currentTime;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(55, t); o.frequency.linearRampToValueAtTime(82, t + 4.4);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 2); g.gain.exponentialRampToValueAtTime(0.0001, t + 6.5);
+    o.connect(g).connect(this.master); o.start(t); o.stop(t + 6.6);
+    const n = this._noise(4.5), f = c.createBiquadFilter(), ng = c.createGain();
+    f.type = 'bandpass'; f.Q.value = 2; f.frequency.setValueAtTime(400, t); f.frequency.exponentialRampToValueAtTime(2600, t + 4.3);
+    ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(0.06, t + 4); ng.gain.exponentialRampToValueAtTime(0.0001, t + 4.5);
+    n.connect(f).connect(ng).connect(this.master); n.start(t);
+  },
   surge(level = 0.5) {
     if (!this.enabled) return;
     const c = this.ctx, t = c.currentTime;
